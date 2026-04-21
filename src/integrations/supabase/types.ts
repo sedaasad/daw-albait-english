@@ -14,16 +14,238 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      lessons: {
+        Row: {
+          audio_url: string | null
+          body_md: string
+          created_at: string
+          day_number: number
+          description_ar: string
+          id: string
+          image_url: string | null
+          is_published: boolean
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          audio_url?: string | null
+          body_md?: string
+          created_at?: string
+          day_number: number
+          description_ar?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title_ar: string
+          title_en?: string
+          updated_at?: string
+        }
+        Update: {
+          audio_url?: string | null
+          body_md?: string
+          created_at?: string
+          day_number?: number
+          description_ar?: string
+          id?: string
+          image_url?: string | null
+          is_published?: boolean
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          completed_lessons: string[]
+          created_at: string
+          current_level: Database["public"]["Enums"]["user_level"]
+          display_name: string | null
+          email: string | null
+          id: string
+          is_approved: boolean
+          last_login_date: string | null
+          profile_image: string | null
+          streak_days: number
+          total_points: number
+          updated_at: string
+        }
+        Insert: {
+          completed_lessons?: string[]
+          created_at?: string
+          current_level?: Database["public"]["Enums"]["user_level"]
+          display_name?: string | null
+          email?: string | null
+          id: string
+          is_approved?: boolean
+          last_login_date?: string | null
+          profile_image?: string | null
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_lessons?: string[]
+          created_at?: string
+          current_level?: Database["public"]["Enums"]["user_level"]
+          display_name?: string | null
+          email?: string | null
+          id?: string
+          is_approved?: boolean
+          last_login_date?: string | null
+          profile_image?: string | null
+          streak_days?: number
+          total_points?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          correct_index: number
+          created_at: string
+          id: string
+          lesson_id: string
+          options: Json
+          order_index: number
+          question_ar: string
+          question_en: string
+        }
+        Insert: {
+          correct_index: number
+          created_at?: string
+          id?: string
+          lesson_id: string
+          options: Json
+          order_index?: number
+          question_ar: string
+          question_en?: string
+        }
+        Update: {
+          correct_index?: number
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          options?: Json
+          order_index?: number
+          question_ar?: string
+          question_en?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_scores: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          score: number
+          total: number
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          score: number
+          total: number
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          score?: number
+          total?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_scores_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recordings: {
+        Row: {
+          audio_path: string
+          created_at: string
+          id: string
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          audio_path: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          audio_path?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recordings_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "student" | "admin"
+      user_level: "beginner" | "intermediate" | "advanced"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +372,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["student", "admin"],
+      user_level: ["beginner", "intermediate", "advanced"],
+    },
   },
 } as const
