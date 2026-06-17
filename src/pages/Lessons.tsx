@@ -1,105 +1,207 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Lock, Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CheckCircle2, Circle, Search, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCompletedLessons } from "@/hooks/useCompletedLessons";
+import { toast } from "sonner";
 
 interface Lesson {
   id: string;
   day_number: number;
   title_ar: string;
   title_en: string;
+  description_ar: string | null;
 }
 
+type Filter = "all" | "todo" | "done";
+
+const WEEK_SIZE = 7;
+
 export default function Lessons() {
-  const { profile } = useAuth();
   const navigate = useNavigate();
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [query, setQuery] = useState("");
+  const { completed, toggle } = useCompletedLessons();
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("lessons")
-        .select("id, day_number, title_ar, title_en")
+        .select("id, day_number, title_ar, title_en, description_ar")
         .eq("is_published", true)
         .order("day_number", { ascending: true });
+      if (error) toast.error("تعذّر تحميل الدروس");
       setLessons((data ?? []) as Lesson[]);
       setLoading(false);
     })();
   }, []);
 
-  const completed = new Set(profile?.completed_lessons ?? []);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return lessons.filter((l) => {
+      if (filter === "done" && !completed.has(l.id)) return false;
+      if (filter === "todo" && completed.has(l.id)) return false;
+      if (!q) return true;
+      return (
+        l.title_ar.toLowerCase().includes(q) ||
+        l.title_en.toLowerCase().includes(q) ||
+        String(l.day_number).includes(q)
+      );
+    });
+  }, [lessons, filter, query, completed]);
+
+  const groupedByWeek = useMemo(() => {
+    const groups = new Map<number, Lesson[]>();
+    for (const l of filtered) {
+      const week = Math.ceil(l.day_number / WEEK_SIZE);
+      if (!groups.has(week)) groups.set(week, []);
+      groups.get(week)!.push(l);
+    }
+    return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
+  }, [filtered]);
+
+  const total = lessons.length;
+  const doneCount = lessons.filter((l) => completed.has(l.id)).length;
+  const pct = total ? Math.round((doneCount / total) * 100) : 0;
 
   return (
     <div dir="rtl">
-      <PageHeader title="الدروس" subtitle="منهج 45 يوماً" />
+      <PageHeader title="مكتبة الدروس" subtitle="منهج 45 يوماً" />
 
-      <div className="max-w-md mx-auto px-4 pb-8">
+      <div className="max-w-md mx-auto px-4 pb-24 space-y-5">
+        <Card className="p-4 shadow-card">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-semibold text-primary">تقدّمك</span>
+            <span className="text-sm font-en text-muted-foreground">
+              {doneCount}/{total}
+            </span>
+          </div>
+          <Progress value={pct} className="h-2" />
+          <p className="text-xs text-muted-foreground mt-2">
+            أكملت {pct}% من المنهج
+          </p>
+        </Card>
+
+        <div className="relative">
+          <Search className="size-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحث عن درس أو يوم..."
+            className="pr-9"
+          />
+        </div>
+
+        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
+          <TabsList className="grid grid-cols-3 w-full">
+            <TabsTrigger value="all">الكل</TabsTrigger>
+            <TabsTrigger value="todo">غير مكتملة</TabsTrigger>
+            <TabsTrigger value="done">مكتملة</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {loading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 rounded-2xl" />
+          <div className="space-y-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-2xl" />
             ))}
           </div>
+        ) : filtered.length === 0 ? (
+          <Card className="p-8 text-center text-sm text-muted-foreground">
+            لا توجد دروس مطابقة
+          </Card>
         ) : (
-          <div className="grid grid-cols-2 gap-3">
-            {lessons.map((lesson, idx) => {
-              const isCompleted = completed.has(lesson.id);
-              const prevDone = idx === 0 || completed.has(lessons[idx - 1].id);
-              const isUnlocked = isCompleted || prevDone;
-              return (
-                <button
-                  key={lesson.id}
-                  disabled={!isUnlocked}
-                  onClick={() => navigate(`/lessons/${lesson.id}`)}
-                  className={cn(
-                    "text-right transition-smooth disabled:opacity-50 disabled:cursor-not-allowed",
-                    "active:scale-[0.97]"
-                  )}
-                >
-                  <Card
-                    className={cn(
-                      "p-3 h-28 flex flex-col justify-between shadow-card border-2",
-                      isCompleted
-                        ? "border-success/30 bg-success/5"
-                        : isUnlocked
-                        ? "border-secondary/30 bg-card"
-                        : "border-border bg-muted/40"
-                    )}
-                  >
-                    <div className="flex items-start justify-between">
-                      <span
+          <div className="space-y-6">
+            {groupedByWeek.map(([week, items]) => (
+              <section key={week} className="space-y-2">
+                <h2 className="text-sm font-bold text-primary px-1">
+                  الأسبوع {week}
+                </h2>
+                <div className="space-y-2">
+                  {items.map((lesson) => {
+                    const isDone = completed.has(lesson.id);
+                    return (
+                      <Card
+                        key={lesson.id}
                         className={cn(
-                          "text-xs font-semibold px-2 py-0.5 rounded-full",
-                          isCompleted
-                            ? "bg-success text-success-foreground"
-                            : isUnlocked
-                            ? "bg-secondary text-secondary-foreground"
-                            : "bg-muted text-muted-foreground"
+                          "p-3 shadow-card border-2 transition-smooth flex items-center gap-3",
+                          isDone
+                            ? "border-success/40 bg-success/5"
+                            : "border-transparent"
                         )}
                       >
-                        يوم {lesson.day_number}
-                      </span>
-                      {isCompleted ? (
-                        <CheckCircle2 className="size-4 text-success" />
-                      ) : !isUnlocked ? (
-                        <Lock className="size-4 text-muted-foreground" />
-                      ) : (
-                        <Play className="size-4 text-secondary" />
-                      )}
-                    </div>
-                    <div className="text-xs font-medium leading-tight line-clamp-2">
-                      {lesson.title_ar}
-                    </div>
-                  </Card>
-                </button>
-              );
-            })}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggle(lesson.id);
+                            toast.success(
+                              isDone ? "تم إلغاء الإكمال" : "أحسنت! تم إكمال الدرس"
+                            );
+                          }}
+                          aria-label={isDone ? "إلغاء الإكمال" : "تمييز كمكتمل"}
+                          className="shrink-0 transition-smooth active:scale-90"
+                        >
+                          {isDone ? (
+                            <CheckCircle2 className="size-7 text-success" />
+                          ) : (
+                            <Circle className="size-7 text-muted-foreground/60" />
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => navigate(`/lessons/${lesson.id}`)}
+                          className="flex-1 text-right min-w-0"
+                        >
+                          <div className="flex items-center gap-2 mb-0.5">
+                            <span
+                              className={cn(
+                                "text-[10px] font-bold px-1.5 py-0.5 rounded",
+                                isDone
+                                  ? "bg-success/15 text-success"
+                                  : "bg-secondary/15 text-secondary"
+                              )}
+                            >
+                              يوم {lesson.day_number}
+                            </span>
+                            <span className="text-[10px] font-en text-muted-foreground truncate">
+                              {lesson.title_en}
+                            </span>
+                          </div>
+                          <div className="text-sm font-semibold truncate">
+                            {lesson.title_ar}
+                          </div>
+                          {lesson.description_ar && (
+                            <div className="text-xs text-muted-foreground truncate mt-0.5">
+                              {lesson.description_ar}
+                            </div>
+                          )}
+                        </button>
+
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => navigate(`/lessons/${lesson.id}`)}
+                          aria-label="فتح الدرس"
+                          className="shrink-0"
+                        >
+                          <Play className="size-4 text-primary" />
+                        </Button>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
           </div>
         )}
       </div>
