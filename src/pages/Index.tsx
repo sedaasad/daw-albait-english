@@ -8,11 +8,8 @@ export default function Index() {
   const { user, profile, loading } = useAuth();
 
   useEffect(() => {
-    if (loading) return;
-    if (!user) navigate("/auth", { replace: true });
-    else if (profile && !profile.is_approved) navigate("/pending-approval", { replace: true });
-    else navigate("/home", { replace: true });
-  }, [user, profile, loading, navigate]);
+    navigate("/home", { replace: true });
+  }, [navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gradient-primary text-primary-foreground">
