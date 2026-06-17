@@ -11,28 +11,15 @@ function FullScreenLoader() {
   );
 }
 
+// Auth gates temporarily disabled — all routes are open for development.
 export function RequireAuth({ children }: { children: ReactNode }) {
-  const { user, profile, loading } = useAuth();
-  const location = useLocation();
-  if (loading) return <FullScreenLoader />;
-  if (!user) return <Navigate to="/auth" state={{ from: location }} replace />;
-  if (profile && !profile.is_approved && location.pathname !== "/pending-approval") {
-    return <Navigate to="/pending-approval" replace />;
-  }
   return <>{children}</>;
 }
 
 export function RequireAdmin({ children }: { children: ReactNode }) {
-  const { user, isAdmin, loading } = useAuth();
-  if (loading) return <FullScreenLoader />;
-  if (!user) return <Navigate to="/auth" replace />;
-  if (!isAdmin) return <Navigate to="/home" replace />;
   return <>{children}</>;
 }
 
 export function RedirectIfAuthed({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
-  if (loading) return <FullScreenLoader />;
-  if (user) return <Navigate to="/home" replace />;
   return <>{children}</>;
 }
