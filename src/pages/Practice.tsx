@@ -17,8 +17,11 @@ export default function Practice() {
       <PageHeader title="التمارين" subtitle="الأفعال الشاذة وتمارين تفاعلية" />
 
       <div className="max-w-md mx-auto px-4 pb-24 space-y-5">
+        <SpeechToTextPractice />
+
         <Card className="p-4 shadow-card">
           <div className="flex justify-between items-center mb-3">
+
             <h3 className="font-black">🔀 بطاقات الأفعال الشاذة</h3>
             <span className="text-xs text-muted-foreground font-en">
               {idx + 1}/{VERBS.length}
