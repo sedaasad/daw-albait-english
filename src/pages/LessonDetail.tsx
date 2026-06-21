@@ -8,7 +8,23 @@ import { Progress } from "@/components/ui/progress";
 import { MODULES } from "@/data/curriculum";
 import { useCompletedLessons } from "@/hooks/useCompletedLessons";
 import { RuleSection, FormulaSection, DialogueSection, VocabSection } from "@/components/lesson/Sections";
+import { PronunciationPractice } from "@/components/lesson/PronunciationPractice";
 import { toast } from "sonner";
+
+function collectPhrases(lesson: { sections: any[] }): string[] {
+  const out: string[] = [];
+  for (const s of lesson.sections) {
+    if (s.type === "rule") out.push(...s.data.examples.map((e: any) => e.en));
+    else if (s.type === "vocab") out.push(...s.data.words.map((w: any) => w.en));
+    else if (s.type === "dialogue") out.push(...s.data.exchanges.map((e: any) => e.en));
+    else if (s.type === "formula") {
+      for (const k of ["positive", "negative", "question"]) {
+        if (s.data[k]) out.push(...s.data[k].map((e: any) => e.en));
+      }
+    }
+  }
+  return Array.from(new Set(out)).slice(0, 12);
+}
 
 type Tab = "learn" | "quiz";
 
@@ -104,6 +120,10 @@ export default function LessonDetail() {
                 {sec.type === "vocab" && <VocabSection d={sec.data} />}
               </Card>
             ))}
+            {(() => {
+              const phrases = collectPhrases(lesson);
+              return phrases.length > 0 ? <PronunciationPractice phrases={phrases} /> : null;
+            })()}
             {quiz.length > 0 && (
               <Button className="w-full h-12" onClick={finishLesson}>
                 {completed.has(lesson.id) ? "انتقل للاختبار 🎯" : "أنهِ الدرس وانتقل للاختبار 🎯"}

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { RuleData, FormulaData, DialogueData, VocabData } from "@/data/curriculum";
+import { SpeakButton } from "./SpeakButton";
 
 export function RuleSection({ d }: { d: RuleData }) {
   return (
@@ -8,16 +9,20 @@ export function RuleSection({ d }: { d: RuleData }) {
         <div className="w-14 h-14 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center font-en text-2xl font-black">
           {d.letter}
         </div>
-        <div>
+        <div className="flex-1">
           <p className="text-xs text-muted-foreground">يعادل بالعربي</p>
           <p className="font-black text-foreground text-lg">{d.arabic}</p>
         </div>
+        <SpeakButton text={`The letter ${d.letter}`} size="md" />
       </div>
       <p className="text-sm text-foreground bg-muted rounded-xl p-3 mb-3">{d.rule}</p>
       <div className="space-y-2">
         {d.examples.map((ex, i) => (
-          <div key={i} className="flex items-center justify-between bg-muted/50 rounded-xl px-3 py-2.5">
-            <span className="font-black text-primary text-sm font-en">{ex.en}</span>
+          <div key={i} className="flex items-center justify-between gap-2 bg-muted/50 rounded-xl px-3 py-2.5">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <SpeakButton text={ex.en} />
+              <span className="font-black text-primary text-sm font-en truncate">{ex.en}</span>
+            </div>
             <span className="text-sm text-muted-foreground">{ex.ar}</span>
           </div>
         ))}
@@ -56,7 +61,10 @@ export function FormulaSection({ d }: { d: FormulaData }) {
               {items.map((ex, i) => (
                 <div key={i} className="bg-muted/50 rounded-xl p-3">
                   <p className="text-sm text-foreground mb-1">{ex.ar}</p>
-                  <p className="text-sm font-bold text-primary font-en">{ex.en}</p>
+                  <div className="flex items-center gap-2">
+                    <SpeakButton text={ex.en} />
+                    <p className="text-sm font-bold text-primary font-en flex-1">{ex.en}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -85,7 +93,15 @@ export function DialogueSection({ d }: { d: DialogueData }) {
                 isPrimary ? "bg-primary text-primary-foreground" : ex.sp === 2 ? "bg-secondary text-secondary-foreground" : "bg-muted"
               )}
             >
-              <p className="text-sm font-en font-bold">{ex.en}</p>
+              <div className="flex items-start gap-2">
+                <SpeakButton
+                  text={ex.en}
+                  className={cn(
+                    (isPrimary || ex.sp === 2) && "bg-white/20 text-white hover:bg-white/30"
+                  )}
+                />
+                <p className="text-sm font-en font-bold flex-1">{ex.en}</p>
+              </div>
               <p className={cn("text-xs mt-1", isPrimary || ex.sp === 2 ? "opacity-70" : "text-muted-foreground")}>{ex.ar}</p>
             </div>
           </div>
@@ -100,8 +116,11 @@ export function VocabSection({ d }: { d: VocabData }) {
     <div className="grid grid-cols-2 gap-2">
       {d.words.map((w, i) => (
         <div key={i} className="bg-muted/50 rounded-xl p-3 text-center">
-          <p className="font-black text-primary text-sm font-en">{w.en}</p>
-          <p className="text-xs text-muted-foreground mt-1">{w.ar}</p>
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <SpeakButton text={w.en} />
+            <p className="font-black text-primary text-sm font-en">{w.en}</p>
+          </div>
+          <p className="text-xs text-muted-foreground">{w.ar}</p>
         </div>
       ))}
     </div>
