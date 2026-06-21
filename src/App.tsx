@@ -39,6 +39,11 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
+                <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+                <Route path="/auth/forget-password" element={<ForgotPassword />} />
+                <Route path="/auth/Forgetpassword" element={<ForgotPassword />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route
                   path="/pending-approval"
                   element={
