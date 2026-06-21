@@ -10,6 +10,8 @@ import { PlacementGate } from "@/components/PlacementGate";
 
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import PendingApproval from "./pages/PendingApproval.tsx";
 import Home from "./pages/Home.tsx";
 import Lessons from "./pages/Lessons.tsx";
