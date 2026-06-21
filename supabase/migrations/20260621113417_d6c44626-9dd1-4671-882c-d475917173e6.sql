@@ -1,0 +1,1 @@
+ALTER TABLE public.speech_attempts ADD COLUMN IF NOT EXISTS accuracy_percentage NUMERIC(5,2);

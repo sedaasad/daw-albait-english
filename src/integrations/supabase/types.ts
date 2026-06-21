@@ -211,6 +211,7 @@ export type Database = {
       }
       speech_attempts: {
         Row: {
+          accuracy_percentage: number | null
           audio_path: string | null
           created_at: string
           id: string
@@ -221,6 +222,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          accuracy_percentage?: number | null
           audio_path?: string | null
           created_at?: string
           id?: string
@@ -231,6 +233,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          accuracy_percentage?: number | null
           audio_path?: string | null
           created_at?: string
           id?: string
