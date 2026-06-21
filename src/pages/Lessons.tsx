@@ -1,209 +1,96 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle2, Circle, Search, Play } from "lucide-react";
+import { Search, Lock, ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MODULES, LEVEL_LABEL, TOTAL_LESSONS, type Level } from "@/data/curriculum";
 import { useCompletedLessons } from "@/hooks/useCompletedLessons";
-import { toast } from "sonner";
 
-interface Lesson {
-  id: string;
-  day_number: number;
-  title_ar: string;
-  title_en: string;
-  description_ar: string | null;
-}
-
-type Filter = "all" | "todo" | "done";
-
-const WEEK_SIZE = 7;
+type Filter = Level | "all";
 
 export default function Lessons() {
   const navigate = useNavigate();
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<Filter>("all");
   const [query, setQuery] = useState("");
-  const { completed, toggle } = useCompletedLessons();
-
-  useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("lessons")
-        .select("id, day_number, title_ar, title_en, description_ar")
-        .eq("is_published", true)
-        .order("day_number", { ascending: true });
-      if (error) toast.error("تعذّر تحميل الدروس");
-      setLessons((data ?? []) as Lesson[]);
-      setLoading(false);
-    })();
-  }, []);
+  const [level, setLevel] = useState<Filter>("all");
+  const { completed } = useCompletedLessons();
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return lessons.filter((l) => {
-      if (filter === "done" && !completed.has(l.id)) return false;
-      if (filter === "todo" && completed.has(l.id)) return false;
-      if (!q) return true;
-      return (
-        l.title_ar.toLowerCase().includes(q) ||
-        l.title_en.toLowerCase().includes(q) ||
-        String(l.day_number).includes(q)
-      );
+    return MODULES.filter((m) => {
+      const matchesQ = !q || (m.titleAr + " " + m.titleEn).toLowerCase().includes(q);
+      const matchesL = level === "all" || m.level === level;
+      return matchesQ && matchesL;
     });
-  }, [lessons, filter, query, completed]);
+  }, [query, level]);
 
-  const groupedByWeek = useMemo(() => {
-    const groups = new Map<number, Lesson[]>();
-    for (const l of filtered) {
-      const week = Math.ceil(l.day_number / WEEK_SIZE);
-      if (!groups.has(week)) groups.set(week, []);
-      groups.get(week)!.push(l);
-    }
-    return Array.from(groups.entries()).sort((a, b) => a[0] - b[0]);
-  }, [filtered]);
-
-  const total = lessons.length;
-  const doneCount = lessons.filter((l) => completed.has(l.id)).length;
-  const pct = total ? Math.round((doneCount / total) * 100) : 0;
+  const doneCount = MODULES.flatMap((m) => m.lessons).filter((l) => completed.has(l.id)).length;
+  const pct = TOTAL_LESSONS ? Math.round((doneCount / TOTAL_LESSONS) * 100) : 0;
 
   return (
     <div dir="rtl">
-      <PageHeader title="مكتبة الدروس" subtitle="منهج 45 يوماً" />
+      <PageHeader title="الوحدات الدراسية" subtitle="منهج ضوء البيت الشامل" />
 
       <div className="max-w-md mx-auto px-4 pb-24 space-y-5">
         <Card className="p-4 shadow-card">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-primary">تقدّمك</span>
-            <span className="text-sm font-en text-muted-foreground">
-              {doneCount}/{total}
-            </span>
+            <span className="text-sm font-en text-muted-foreground">{doneCount}/{TOTAL_LESSONS}</span>
           </div>
           <Progress value={pct} className="h-2" />
-          <p className="text-xs text-muted-foreground mt-2">
-            أكملت {pct}% من المنهج
-          </p>
         </Card>
 
         <div className="relative">
           <Search className="size-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ابحث عن درس أو يوم..."
-            className="pr-9"
-          />
+          <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث عن وحدة..." className="pr-9" />
         </div>
 
-        <Tabs value={filter} onValueChange={(v) => setFilter(v as Filter)}>
-          <TabsList className="grid grid-cols-3 w-full">
-            <TabsTrigger value="all">الكل</TabsTrigger>
-            <TabsTrigger value="todo">غير مكتملة</TabsTrigger>
-            <TabsTrigger value="done">مكتملة</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {(["all", "beginner", "intermediate", "advanced"] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setLevel(f)}
+              className={cn(
+                "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-smooth",
+                level === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              )}
+            >
+              {LEVEL_LABEL[f]}
+            </button>
+          ))}
+        </div>
 
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-2xl" />
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <Card className="p-8 text-center text-sm text-muted-foreground">
-            لا توجد دروس مطابقة
-          </Card>
-        ) : (
-          <div className="space-y-6">
-            {groupedByWeek.map(([week, items]) => (
-              <section key={week} className="space-y-2">
-                <h2 className="text-sm font-bold text-primary px-1">
-                  الأسبوع {week}
-                </h2>
-                <div className="space-y-2">
-                  {items.map((lesson) => {
-                    const isDone = completed.has(lesson.id);
-                    return (
-                      <Card
-                        key={lesson.id}
-                        className={cn(
-                          "p-3 shadow-card border-2 transition-smooth flex items-center gap-3",
-                          isDone
-                            ? "border-success/40 bg-success/5"
-                            : "border-transparent"
-                        )}
-                      >
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggle(lesson.id);
-                            toast.success(
-                              isDone ? "تم إلغاء الإكمال" : "أحسنت! تم إكمال الدرس"
-                            );
-                          }}
-                          aria-label={isDone ? "إلغاء الإكمال" : "تمييز كمكتمل"}
-                          className="shrink-0 transition-smooth active:scale-90"
-                        >
-                          {isDone ? (
-                            <CheckCircle2 className="size-7 text-success" />
-                          ) : (
-                            <Circle className="size-7 text-muted-foreground/60" />
-                          )}
-                        </button>
-
-                        <button
-                          onClick={() => navigate(`/lessons/${lesson.id}`)}
-                          className="flex-1 text-right min-w-0"
-                        >
-                          <div className="flex items-center gap-2 mb-0.5">
-                            <span
-                              className={cn(
-                                "text-[10px] font-bold px-1.5 py-0.5 rounded",
-                                isDone
-                                  ? "bg-success/15 text-success"
-                                  : "bg-secondary/15 text-secondary"
-                              )}
-                            >
-                              يوم {lesson.day_number}
-                            </span>
-                            <span className="text-[10px] font-en text-muted-foreground truncate">
-                              {lesson.title_en}
-                            </span>
-                          </div>
-                          <div className="text-sm font-semibold truncate">
-                            {lesson.title_ar}
-                          </div>
-                          {lesson.description_ar && (
-                            <div className="text-xs text-muted-foreground truncate mt-0.5">
-                              {lesson.description_ar}
-                            </div>
-                          )}
-                        </button>
-
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => navigate(`/lessons/${lesson.id}`)}
-                          aria-label="فتح الدرس"
-                          className="shrink-0"
-                        >
-                          <Play className="size-4 text-primary" />
-                        </Button>
-                      </Card>
-                    );
-                  })}
+        <div className="space-y-3">
+          {filtered.map((mod) => {
+            const modDone = mod.lessons.filter((l) => completed.has(l.id)).length;
+            const modPct = mod.lessons.length ? (modDone / mod.lessons.length) * 100 : 0;
+            return (
+              <button
+                key={mod.id}
+                onClick={() => !mod.locked && navigate(`/modules/${mod.id}`)}
+                disabled={mod.locked}
+                className="w-full bg-card rounded-2xl p-4 shadow-card flex items-center gap-4 text-right disabled:opacity-60"
+              >
+                <div className={cn("w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center text-2xl flex-shrink-0", mod.bg)}>
+                  <span>{mod.icon}</span>
                 </div>
-              </section>
-            ))}
-          </div>
-        )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-black text-foreground text-sm">{mod.titleAr}</span>
+                    {mod.locked ? <Lock className="size-3.5 text-muted-foreground" /> : <span className="text-xs text-muted-foreground">{mod.total} درس</span>}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-en mb-2 truncate">
+                    {mod.titleEn} · {LEVEL_LABEL[mod.level]}
+                  </p>
+                  <Progress value={modPct} className="h-1.5" />
+                </div>
+                <ChevronLeft className="size-4 text-muted-foreground shrink-0" />
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
