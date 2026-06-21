@@ -58,6 +58,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          cefr_level: Database["public"]["Enums"]["cefr_level"] | null
           completed_lessons: string[]
           created_at: string
           current_level: Database["public"]["Enums"]["user_level"]
@@ -66,12 +67,18 @@ export type Database = {
           id: string
           is_approved: boolean
           last_login_date: string | null
+          placement_completed: boolean
+          placement_completed_at: string | null
+          placement_score: number | null
+          placement_strengths: string[]
+          placement_weaknesses: string[]
           profile_image: string | null
           streak_days: number
           total_points: number
           updated_at: string
         }
         Insert: {
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           completed_lessons?: string[]
           created_at?: string
           current_level?: Database["public"]["Enums"]["user_level"]
@@ -80,12 +87,18 @@ export type Database = {
           id: string
           is_approved?: boolean
           last_login_date?: string | null
+          placement_completed?: boolean
+          placement_completed_at?: string | null
+          placement_score?: number | null
+          placement_strengths?: string[]
+          placement_weaknesses?: string[]
           profile_image?: string | null
           streak_days?: number
           total_points?: number
           updated_at?: string
         }
         Update: {
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           completed_lessons?: string[]
           created_at?: string
           current_level?: Database["public"]["Enums"]["user_level"]
@@ -94,6 +107,11 @@ export type Database = {
           id?: string
           is_approved?: boolean
           last_login_date?: string | null
+          placement_completed?: boolean
+          placement_completed_at?: string | null
+          placement_score?: number | null
+          placement_strengths?: string[]
+          placement_weaknesses?: string[]
           profile_image?: string | null
           streak_days?: number
           total_points?: number
@@ -296,6 +314,7 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "admin"
+      cefr_level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2"
       user_level: "beginner" | "intermediate" | "advanced"
     }
     CompositeTypes: {
@@ -425,6 +444,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "admin"],
+      cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"],
       user_level: ["beginner", "intermediate", "advanced"],
     },
   },
