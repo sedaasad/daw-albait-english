@@ -17,21 +17,52 @@ export default function ResetPassword() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+    let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (!mounted) return;
+      if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && newSession) {
+        setReady(true);
+      }
+    });
+
     async function checkRecovery() {
-      // Supabase recovery link sets type=recovery in the URL hash.
-      // getSession automatically handles it and signs the user in.
-      const { data, error } = await supabase.auth.getSession();
-      if (error) {
-        toast.error("رابط إعادة التعيين غير صالح أو منتهي الصلاحية");
-        return;
+      try {
+        const code = new URLSearchParams(window.location.search).get("code");
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          if (mounted) {
+            window.history.replaceState({}, document.title, "/reset-password");
+            setReady(true);
+          }
+          return;
+        }
+
+        const { data, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        if (data.session && mounted) {
+          setReady(true);
+          return;
+        }
+
+        toastTimer = setTimeout(() => {
+          if (!mounted) return;
+          toast.error("لم يتم التعرف على الجلسة. أعد فتح الرابط من البريد.");
+        }, 3500);
+      } catch {
+        if (mounted) toast.error("رابط إعادة التعيين غير صالح أو منتهي الصلاحية");
       }
-      if (!data.session) {
-        toast.error("لم يتم التعرف على الجلسة. أعد فتح الرابط من البريد.");
-        return;
-      }
-      setReady(true);
     }
+
     checkRecovery();
+
+    return () => {
+      mounted = false;
+      if (toastTimer) clearTimeout(toastTimer);
+      authListener.subscription.unsubscribe();
+    };
   }, []);
 
   async function handleSubmit(e: React.FormEvent) {
