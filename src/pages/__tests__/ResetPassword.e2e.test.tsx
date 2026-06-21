@@ -18,13 +18,22 @@ import { render, screen, waitFor, cleanup } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 
 // ---- Supabase mock --------------------------------------------------------
-const exchangeCodeForSession = vi.fn();
-const setSession = vi.fn();
-const getSession = vi.fn();
-const updateUser = vi.fn();
-const getUser = vi.fn();
-const onAuthStateChange = vi.fn(() => ({
-  data: { subscription: { unsubscribe: vi.fn() } },
+const {
+  exchangeCodeForSession,
+  setSession,
+  getSession,
+  updateUser,
+  getUser,
+  onAuthStateChange,
+} = vi.hoisted(() => ({
+  exchangeCodeForSession: vi.fn(),
+  setSession: vi.fn(),
+  getSession: vi.fn(),
+  updateUser: vi.fn(),
+  getUser: vi.fn(),
+  onAuthStateChange: vi.fn(() => ({
+    data: { subscription: { unsubscribe: vi.fn() } },
+  })),
 }));
 
 vi.mock("@/integrations/supabase/client", () => ({
