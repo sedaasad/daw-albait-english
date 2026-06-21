@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,6 +118,17 @@ export default function Auth() {
                   {loading && <Loader2 className="size-4 animate-spin" />}
                   {mode === "login" ? "دخول" : "إنشاء الحساب"}
                 </Button>
+
+                {mode === "login" && (
+                  <div className="text-center">
+                    <Link
+                      to="/auth/forgot-password"
+                      className="text-sm text-primary hover:underline"
+                    >
+                      نسيت كلمة المرور؟
+                    </Link>
+                  </div>
+                )}
               </form>
             </Tabs>
           </Card>
