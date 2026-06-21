@@ -5,62 +5,136 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { GraduationCap, Loader2, Lock, CheckCircle2 } from "lucide-react";
+import { GraduationCap, Loader2, Lock, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
+
+type Status = "checking" | "ready" | "error" | "done";
+
+function mapRecoveryError(code?: string | null, description?: string | null): string {
+  const d = (description || "").toLowerCase();
+  const c = (code || "").toLowerCase();
+  if (c.includes("expired") || d.includes("expired")) {
+    return "انتهت صلاحية الرابط، اطلب رابطاً جديداً.";
+  }
+  if (c.includes("used") || d.includes("already") || d.includes("consumed")) {
+    return "تم استخدام رابط الاستعادة مسبقاً.";
+  }
+  if (c.includes("access_denied") || d.includes("access denied")) {
+    return "تم رفض الوصول. اطلب رابطاً جديداً.";
+  }
+  if (c.includes("invalid") || d.includes("invalid")) {
+    return "الرابط غير صالح.";
+  }
+  return "الرابط غير صالح أو منتهي الصلاحية.";
+}
 
 export default function ResetPassword() {
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ready, setReady] = useState(false);
-  const [done, setDone] = useState(false);
+  const [status, setStatus] = useState<Status>("checking");
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
   useEffect(() => {
     let mounted = true;
-    let toastTimer: ReturnType<typeof setTimeout> | undefined;
+
+    function cleanUrl() {
+      window.history.replaceState({}, document.title, "/reset-password");
+    }
+
+    function fail(msg: string) {
+      if (!mounted) return;
+      setErrorMsg(msg);
+      setStatus("error");
+      toast.error(msg);
+    }
 
     const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
       if (!mounted) return;
       if ((event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") && newSession) {
-        setReady(true);
+        cleanUrl();
+        setStatus("ready");
       }
     });
 
-    async function checkRecovery() {
+    async function initRecovery() {
       try {
-        const code = new URLSearchParams(window.location.search).get("code");
+        const query = new URLSearchParams(window.location.search);
+        const hash = new URLSearchParams(
+          window.location.hash.startsWith("#") ? window.location.hash.slice(1) : window.location.hash
+        );
+
+        // 1) Explicit errors in either URL location
+        const errCode =
+          query.get("error_code") || query.get("error") || hash.get("error_code") || hash.get("error");
+        const errDesc = query.get("error_description") || hash.get("error_description");
+        if (errCode || errDesc) {
+          fail(mapRecoveryError(errCode, errDesc));
+          return;
+        }
+
+        // 2) PKCE-style ?code=
+        const code = query.get("code");
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (error) throw error;
-          if (mounted) {
-            window.history.replaceState({}, document.title, "/reset-password");
-            setReady(true);
+          if (error) {
+            fail(mapRecoveryError(null, error.message));
+            return;
           }
-          return;
-        }
-
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        if (data.session && mounted) {
-          setReady(true);
-          return;
-        }
-
-        toastTimer = setTimeout(() => {
           if (!mounted) return;
-          toast.error("لم يتم التعرف على الجلسة. أعد فتح الرابط من البريد.");
-        }, 3500);
-      } catch {
-        if (mounted) toast.error("رابط إعادة التعيين غير صالح أو منتهي الصلاحية");
+          cleanUrl();
+          setStatus("ready");
+          return;
+        }
+
+        // 3) Implicit/hash-style #access_token=...&refresh_token=...&type=recovery
+        const accessToken = hash.get("access_token");
+        const refreshToken = hash.get("refresh_token");
+        const type = hash.get("type");
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) {
+            fail(mapRecoveryError(null, error.message));
+            return;
+          }
+          if (!mounted) return;
+          cleanUrl();
+          setStatus("ready");
+          return;
+        }
+        if (type === "recovery" && !accessToken) {
+          fail("الرابط غير صالح.");
+          return;
+        }
+
+        // 4) Fall back to existing session (e.g. PASSWORD_RECOVERY already handled)
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          fail(mapRecoveryError(null, error.message));
+          return;
+        }
+        if (data.session) {
+          if (!mounted) return;
+          setStatus("ready");
+          return;
+        }
+
+        // 5) Nothing usable
+        fail("لم يتم العثور على رابط استعادة صالح. أعد فتح الرابط من البريد.");
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        fail(mapRecoveryError(null, msg));
       }
     }
 
-    checkRecovery();
+    initRecovery();
 
     return () => {
       mounted = false;
-      if (toastTimer) clearTimeout(toastTimer);
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -80,10 +154,9 @@ export default function ResetPassword() {
     try {
       const { error } = await supabase.auth.updateUser({ password });
       if (error) throw error;
-      setDone(true);
+      setStatus("done");
       toast.success("تم تغيير كلمة المرور بنجاح");
 
-      // Determine redirect based on current user's role
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
       let target = "/home";
@@ -131,7 +204,7 @@ export default function ResetPassword() {
               </p>
             </div>
 
-            {done ? (
+            {status === "done" ? (
               <div className="text-center space-y-4">
                 <CheckCircle2 className="size-12 text-success mx-auto" />
                 <p className="text-muted-foreground">
@@ -141,10 +214,22 @@ export default function ResetPassword() {
                   تسجيل الدخول
                 </Button>
               </div>
-            ) : !ready ? (
+            ) : status === "checking" ? (
               <div className="text-center py-6">
                 <Loader2 className="size-8 animate-spin text-primary mx-auto" />
                 <p className="text-sm text-muted-foreground mt-3">جاري التحقق من الرابط...</p>
+              </div>
+            ) : status === "error" ? (
+              <div className="text-center space-y-4 py-2">
+                <AlertCircle className="size-12 text-destructive mx-auto" />
+                <p className="text-sm text-muted-foreground">{errorMsg}</p>
+                <Button
+                  className="w-full h-12"
+                  variant="outline"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  طلب رابط جديد
+                </Button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
