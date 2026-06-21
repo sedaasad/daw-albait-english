@@ -12,8 +12,9 @@ import Auth from "./pages/Auth.tsx";
 import PendingApproval from "./pages/PendingApproval.tsx";
 import Home from "./pages/Home.tsx";
 import Lessons from "./pages/Lessons.tsx";
+import ModuleDetail from "./pages/ModuleDetail.tsx";
 import LessonDetail from "./pages/LessonDetail.tsx";
-import Quiz from "./pages/Quiz.tsx";
+import Practice from "./pages/Practice.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminHome from "./pages/admin/AdminHome.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
@@ -43,8 +44,9 @@ const App = () => (
               />
               <Route path="/home" element={<RequireAuth><Home /></RequireAuth>} />
               <Route path="/lessons" element={<RequireAuth><Lessons /></RequireAuth>} />
-              <Route path="/lessons/:id" element={<RequireAuth><LessonDetail /></RequireAuth>} />
-              <Route path="/lessons/:id/quiz" element={<RequireAuth><Quiz /></RequireAuth>} />
+              <Route path="/modules/:moduleId" element={<RequireAuth><ModuleDetail /></RequireAuth>} />
+              <Route path="/modules/:moduleId/:lessonId" element={<RequireAuth><LessonDetail /></RequireAuth>} />
+              <Route path="/practice" element={<RequireAuth><Practice /></RequireAuth>} />
               <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
               <Route path="/admin" element={<RequireAdmin><AdminHome /></RequireAdmin>} />
               <Route path="/admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />

@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { Home, BookOpen, User, Shield } from "lucide-react";
+import { Home, BookOpen, Dumbbell, User, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -17,15 +17,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           dir="rtl"
           className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border shadow-elevated safe-bottom"
         >
-          <div className="max-w-md mx-auto grid grid-cols-4 gap-1 px-2 pt-2">
+          <div className={cn("max-w-md mx-auto grid gap-1 px-2 pt-2", isAdmin ? "grid-cols-5" : "grid-cols-4")}>
             <TabLink to="/home" icon={<Home className="size-5" />} label="الرئيسية" />
             <TabLink to="/lessons" icon={<BookOpen className="size-5" />} label="الدروس" />
+            <TabLink to="/practice" icon={<Dumbbell className="size-5" />} label="التمارين" />
             <TabLink to="/profile" icon={<User className="size-5" />} label="حسابي" />
-            {isAdmin ? (
-              <TabLink to="/admin" icon={<Shield className="size-5" />} label="الإدارة" />
-            ) : (
-              <div />
-            )}
+            {isAdmin && <TabLink to="/admin" icon={<Shield className="size-5" />} label="الإدارة" />}
           </div>
         </nav>
       )}
