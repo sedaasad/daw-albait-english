@@ -82,6 +82,24 @@ export default function ResetPassword() {
       if (error) throw error;
       setDone(true);
       toast.success("تم تغيير كلمة المرور بنجاح");
+
+      // Determine redirect based on current user's role
+      const { data: userData } = await supabase.auth.getUser();
+      const userId = userData.user?.id;
+      let target = "/home";
+      if (userId) {
+        const { data: roleRow } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", userId)
+          .eq("role", "admin")
+          .maybeSingle();
+        if (roleRow) target = "/admin";
+      } else {
+        target = "/auth";
+      }
+
+      setTimeout(() => navigate(target, { replace: true }), 1500);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "حدث خطأ غير متوقع";
       toast.error(msg);
