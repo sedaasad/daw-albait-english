@@ -1,281 +1,194 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
-import { PageHeader } from "@/components/layout/PageHeader";
+import { ArrowRight, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Mic, Square, Play, Pause, Trash2, Volume2, ArrowLeft, CheckCircle2, Award } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { MODULES } from "@/data/curriculum";
+import { useCompletedLessons } from "@/hooks/useCompletedLessons";
+import { RuleSection, FormulaSection, DialogueSection, VocabSection } from "@/components/lesson/Sections";
 import { toast } from "sonner";
 
-interface Lesson {
-  id: string;
-  day_number: number;
-  title_ar: string;
-  title_en: string;
-  description_ar: string;
-  body_md: string;
-  image_url: string | null;
-  audio_url: string | null;
-}
+type Tab = "learn" | "quiz";
 
 export default function LessonDetail() {
-  const { id } = useParams();
+  const { moduleId, lessonId } = useParams();
   const navigate = useNavigate();
-  const { user, profile, refreshProfile } = useAuth();
-  const [lesson, setLesson] = useState<Lesson | null>(null);
-  const [hasQuiz, setHasQuiz] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [marking, setMarking] = useState(false);
+  const { completed, markComplete } = useCompletedLessons();
 
-  useEffect(() => {
-    if (!id) return;
-    (async () => {
-      const [{ data: l }, { count }] = await Promise.all([
-        supabase.from("lessons").select("*").eq("id", id).maybeSingle(),
-        supabase.from("quiz_questions").select("*", { count: "exact", head: true }).eq("lesson_id", id),
-      ]);
-      setLesson(l as Lesson);
-      setHasQuiz((count ?? 0) > 0);
-      setLoading(false);
-    })();
-  }, [id]);
+  const mod = MODULES.find((m) => m.id === moduleId);
+  const lesson = mod?.lessons.find((l) => l.id === lessonId);
 
-  const isCompleted = !!(profile?.completed_lessons.includes(id ?? ""));
+  const [tab, setTab] = useState<Tab>("learn");
+  const [qStarted, setQStarted] = useState(false);
+  const [qDone, setQDone] = useState(false);
+  const [qIdx, setQIdx] = useState(0);
+  const [qSel, setQSel] = useState<number | null>(null);
+  const [qScore, setQScore] = useState(0);
 
-  async function markComplete() {
-    if (!user || !id || !profile) return;
-    if (isCompleted) {
-      navigate("/lessons");
-      return;
-    }
-    setMarking(true);
-    const next = [...profile.completed_lessons, id];
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        completed_lessons: next,
-        total_points: profile.total_points + 10,
-        last_login_date: new Date().toISOString(),
-      })
-      .eq("id", user.id);
-    setMarking(false);
-    if (error) {
-      toast.error("تعذر حفظ التقدم");
-      return;
-    }
-    toast.success("أحسنت! تم إنجاز الدرس (+10 نقاط)");
-    await refreshProfile();
-    navigate("/lessons");
+  if (!mod || !lesson) {
+    return <div dir="rtl" className="p-10 text-center text-muted-foreground">الدرس غير موجود</div>;
   }
 
-  if (loading) {
-    return (
-      <div dir="rtl">
-        <PageHeader title="الدرس" back />
-        <div className="max-w-md mx-auto px-4 space-y-4">
-          <Skeleton className="h-40 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </div>
-      </div>
-    );
+  const quiz = lesson.quiz;
+
+  function resetQuiz() {
+    setQStarted(false); setQDone(false); setQIdx(0); setQSel(null); setQScore(0);
   }
 
-  if (!lesson) {
-    return (
-      <div dir="rtl">
-        <PageHeader title="الدرس" back />
-        <div className="text-center text-muted-foreground p-10">الدرس غير موجود</div>
-      </div>
-    );
+  function handleAnswer(idx: number) {
+    if (qSel !== null) return;
+    setQSel(idx);
+    const ok = idx === quiz[qIdx].c;
+    if (ok) setQScore((s) => s + 1);
+    setTimeout(() => {
+      if (qIdx + 1 < quiz.length) {
+        setQIdx((q) => q + 1); setQSel(null);
+      } else {
+        setQDone(true);
+      }
+    }, 900);
+  }
+
+  function finishLesson() {
+    if (!completed.has(lesson!.id)) {
+      markComplete(lesson!.id);
+      toast.success("أحسنت! تم إنجاز الدرس (+10 نقاط)");
+    }
+    setTab("quiz");
   }
 
   return (
-    <div dir="rtl">
-      <PageHeader
-        title={`اليوم ${lesson.day_number}`}
-        subtitle={lesson.title_ar}
-        back
-        variant="gradient"
-      />
-
-      <div className="max-w-md mx-auto px-4 -mt-4 space-y-5">
-        {lesson.image_url && (
-          <Card className="overflow-hidden shadow-card animate-fade-in">
-            <img src={lesson.image_url} alt={lesson.title_ar} className="w-full h-48 object-cover" />
-          </Card>
-        )}
-
-        <Card className="p-5 shadow-card animate-fade-in">
-          {lesson.title_en && (
-            <p className="font-en text-lg font-semibold text-primary mb-2">{lesson.title_en}</p>
-          )}
-          {lesson.description_ar && (
-            <p className="text-muted-foreground leading-relaxed mb-3">{lesson.description_ar}</p>
-          )}
-          {lesson.body_md && (
-            <div className="prose prose-sm max-w-none whitespace-pre-wrap leading-relaxed">
-              {lesson.body_md}
-            </div>
-          )}
-          {!lesson.body_md && !lesson.description_ar && (
-            <p className="text-muted-foreground text-sm">
-              سيقوم المعلم بإضافة محتوى هذا الدرس قريباً.
-            </p>
-          )}
-        </Card>
-
-        {lesson.audio_url && (
-          <Card className="p-4 shadow-card animate-fade-in">
-            <div className="flex items-center gap-2 text-secondary text-sm font-semibold mb-3">
-              <Volume2 className="size-4" />
-              <span>استمع إلى النطق</span>
-            </div>
-            <audio controls src={lesson.audio_url} className="w-full" />
-          </Card>
-        )}
-
-        <SpeakingPractice lessonId={lesson.id} userId={user?.id ?? ""} />
-
-        <div className="space-y-3 pt-2">
-          {hasQuiz && (
-            <Button
-              variant="secondary"
-              className="w-full h-12"
-              onClick={() => navigate(`/lessons/${lesson.id}/quiz`)}
-            >
-              <Award className="size-4" />
-              ابدأ الاختبار
-            </Button>
-          )}
-          <Button className="w-full h-12" onClick={markComplete} disabled={marking}>
-            {isCompleted ? (
-              <>
-                <CheckCircle2 className="size-4" /> تم الإنجاز — رجوع
-              </>
-            ) : (
-              <>
-                <ArrowLeft className="size-4" /> إنهاء الدرس
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SpeakingPractice({ lessonId, userId }: { lessonId: string; userId: string }) {
-  const [recording, setRecording] = useState(false);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  async function start() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mr = new MediaRecorder(stream);
-      chunksRef.current = [];
-      mr.ondataavailable = (e) => e.data.size > 0 && chunksRef.current.push(e.data);
-      mr.onstop = () => {
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        setAudioUrl(URL.createObjectURL(blob));
-        stream.getTracks().forEach((t) => t.stop());
-      };
-      mr.start();
-      mediaRecorderRef.current = mr;
-      setRecording(true);
-    } catch {
-      toast.error("تعذر الوصول إلى الميكروفون");
-    }
-  }
-
-  function stop() {
-    mediaRecorderRef.current?.stop();
-    setRecording(false);
-  }
-
-  function toggle() {
-    if (!audioRef.current) return;
-    if (playing) audioRef.current.pause();
-    else audioRef.current.play();
-  }
-
-  function reset() {
-    setAudioUrl(null);
-    setPlaying(false);
-  }
-
-  async function save() {
-    if (!audioUrl || !userId) return;
-    setUploading(true);
-    try {
-      const blob = await fetch(audioUrl).then((r) => r.blob());
-      const path = `${userId}/${lessonId}-${Date.now()}.webm`;
-      const { error: upErr } = await supabase.storage.from("recordings").upload(path, blob, {
-        contentType: "audio/webm",
-      });
-      if (upErr) throw upErr;
-      const { error: insErr } = await supabase
-        .from("recordings")
-        .insert({ user_id: userId, lesson_id: lessonId, audio_path: path });
-      if (insErr) throw insErr;
-      toast.success("تم حفظ تسجيلك");
-      reset();
-    } catch {
-      toast.error("تعذر حفظ التسجيل");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  return (
-    <Card className="p-5 shadow-card animate-fade-in">
-      <div className="flex items-center gap-2 text-secondary text-sm font-semibold mb-3">
-        <Mic className="size-4" />
-        <span>تدرب على النطق</span>
-      </div>
-      <p className="text-xs text-muted-foreground mb-4">
-        سجّل صوتك واستمع إلى أدائك ثم احفظه للمراجعة لاحقاً.
-      </p>
-
-      {!audioUrl ? (
-        <Button
-          onClick={recording ? stop : start}
-          variant={recording ? "destructive" : "default"}
-          className="w-full h-12"
-        >
-          {recording ? <Square className="size-4" /> : <Mic className="size-4" />}
-          {recording ? "إيقاف التسجيل" : "ابدأ التسجيل"}
-        </Button>
-      ) : (
-        <div className="space-y-3">
-          <audio
-            ref={audioRef}
-            src={audioUrl}
-            onPlay={() => setPlaying(true)}
-            onPause={() => setPlaying(false)}
-            onEnded={() => setPlaying(false)}
-            className="w-full"
-            controls
-          />
-          <div className="grid grid-cols-3 gap-2">
-            <Button onClick={toggle} variant="outline" size="sm">
-              {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
-            </Button>
-            <Button onClick={reset} variant="outline" size="sm">
-              <Trash2 className="size-4" />
-            </Button>
-            <Button onClick={save} size="sm" disabled={uploading}>
-              {uploading ? "..." : "حفظ"}
-            </Button>
+    <div dir="rtl" className="min-h-screen pb-24">
+      <div className="bg-card px-5 pt-10 pb-4 shadow-card">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => { navigate(`/modules/${mod.id}`); resetQuiz(); }}
+            className="w-9 h-9 rounded-full bg-muted flex items-center justify-center"
+            aria-label="رجوع"
+          >
+            <ArrowRight className="size-4" />
+          </button>
+          <div>
+            <h1 className="font-black text-foreground">{lesson.titleAr}</h1>
+            <p className="text-xs text-muted-foreground font-en">{lesson.titleEn}</p>
           </div>
         </div>
-      )}
-    </Card>
+      </div>
+
+      <div className="max-w-md mx-auto px-4">
+        <div className="mt-4 bg-card rounded-2xl flex overflow-hidden shadow-card">
+          {(["learn", "quiz"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => { setTab(t); resetQuiz(); }}
+              className={cn(
+                "flex-1 py-3 text-sm font-black transition-smooth",
+                tab === t ? "bg-primary text-primary-foreground" : "text-muted-foreground"
+              )}
+            >
+              {t === "learn" ? "📖 الشرح" : "🎯 الاختبار"}
+            </button>
+          ))}
+        </div>
+
+        {tab === "learn" && (
+          <div className="mt-4 space-y-4">
+            {lesson.sections.map((sec, si) => (
+              <Card key={si} className="p-5 shadow-card">
+                <h3 className="font-black text-primary mb-3 text-base">{sec.titleAr}</h3>
+                {sec.type === "rule" && <RuleSection d={sec.data} />}
+                {sec.type === "formula" && <FormulaSection d={sec.data} />}
+                {sec.type === "dialogue" && <DialogueSection d={sec.data} />}
+                {sec.type === "vocab" && <VocabSection d={sec.data} />}
+              </Card>
+            ))}
+            {quiz.length > 0 && (
+              <Button className="w-full h-12" onClick={finishLesson}>
+                {completed.has(lesson.id) ? "انتقل للاختبار 🎯" : "أنهِ الدرس وانتقل للاختبار 🎯"}
+              </Button>
+            )}
+          </div>
+        )}
+
+        {tab === "quiz" && (
+          <div className="mt-4">
+            {!qStarted ? (
+              <Card className="p-8 text-center shadow-card">
+                <span className="text-5xl block mb-3">🎯</span>
+                <h3 className="font-black text-lg mb-1">اختبار الدرس</h3>
+                <p className="text-sm text-muted-foreground mb-5">
+                  {quiz.length} أسئلة — +{quiz.length * 10} نقطة
+                </p>
+                <Button className="w-full h-12" onClick={() => setQStarted(true)}>ابدأ الاختبار</Button>
+              </Card>
+            ) : qDone ? (
+              <Card className="p-8 text-center shadow-card">
+                <span className="text-5xl block mb-3">
+                  {qScore === quiz.length ? "🏆" : qScore >= quiz.length / 2 ? "⭐" : "💪"}
+                </span>
+                <h3 className="font-black text-lg mb-1">
+                  {qScore === quiz.length ? "ممتاز!" : qScore >= quiz.length / 2 ? "أحسنت!" : "حاول مرة أخرى"}
+                </h3>
+                <p className="text-2xl font-black text-primary my-3">
+                  {qScore}/{quiz.length}
+                </p>
+                <p className="text-sm text-success mb-5">+{qScore * 10} نقطة ⭐</p>
+                <div className="flex gap-2">
+                  <Button variant="outline" className="flex-1" onClick={resetQuiz}>
+                    <RotateCcw className="size-4" /> إعادة
+                  </Button>
+                  <Button className="flex-1" onClick={() => navigate(`/modules/${mod.id}`)}>
+                    الدروس
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Card className="p-5 shadow-card">
+                <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                  <span>سؤال {qIdx + 1} من {quiz.length}</span>
+                  <span>النتيجة: {qScore} ✓</span>
+                </div>
+                <Progress value={(qIdx / quiz.length) * 100} className="h-1.5 mb-4" />
+                <p className="font-black text-base mb-4 leading-relaxed">{quiz[qIdx].q}</p>
+                <div className="space-y-2">
+                  {quiz[qIdx].opts.map((opt, i) => {
+                    const isCorrect = i === quiz[qIdx].c;
+                    const isPicked = qSel === i;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => handleAnswer(i)}
+                        disabled={qSel !== null}
+                        className={cn(
+                          "w-full text-right py-3 px-4 rounded-xl border-2 text-sm font-bold transition-smooth flex items-center justify-between",
+                          qSel === null && "border-border bg-muted/50 hover:border-primary",
+                          qSel !== null && isCorrect && "border-success bg-success/10 text-success",
+                          qSel !== null && isPicked && !isCorrect && "border-destructive bg-destructive/10 text-destructive",
+                          qSel !== null && !isCorrect && !isPicked && "border-border bg-muted/30 opacity-40"
+                        )}
+                      >
+                        <span>{opt}</span>
+                        {qSel !== null && isCorrect && <CheckCircle2 className="size-4 text-success" />}
+                        {isPicked && !isCorrect && <XCircle className="size-4 text-destructive" />}
+                      </button>
+                    );
+                  })}
+                </div>
+                {qSel !== null && (
+                  <div className={cn(
+                    "mt-3 rounded-xl p-3 text-xs",
+                    qSel === quiz[qIdx].c ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                  )}>
+                    💡 {quiz[qIdx].exp}
+                  </div>
+                )}
+              </Card>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
