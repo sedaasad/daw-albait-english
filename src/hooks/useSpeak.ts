@@ -3,6 +3,19 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const cache = new Map<string, string>(); // text -> blob url
+let fallbackNotified = false; // show the "switched to backup voice" toast once per session
+
+const FUNCTIONS_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.functions.supabase.co/tts`;
+
+function reasonMessage(reason: string | null): string {
+  switch (reason) {
+    case "auth": return "مفتاح ElevenLabs غير صالح — تم التبديل للصوت الاحتياطي.";
+    case "rate_limit": return "تم تجاوز حد ElevenLabs مؤقتاً — تم التبديل للصوت الاحتياطي.";
+    case "quota": return "نفدت حصة ElevenLabs — تم التبديل للصوت الاحتياطي.";
+    case "network": return "تعذر الوصول إلى ElevenLabs — تم التبديل للصوت الاحتياطي.";
+    default: return "تم التبديل تلقائياً إلى الصوت الاحتياطي.";
+  }
+}
 
 export function useSpeak() {
   const [speakingKey, setSpeakingKey] = useState<string | null>(null);
@@ -19,12 +32,35 @@ export function useSpeak() {
 
       let url = cache.get(text);
       if (!url) {
-        const { data, error } = await supabase.functions.invoke("tts", {
-          body: { text, voice: "alloy" },
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(FUNCTIONS_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            ...(session?.access_token
+              ? { Authorization: `Bearer ${session.access_token}` }
+              : { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` }),
+          },
+          body: JSON.stringify({ text, voice: "alloy" }),
         });
-        if (error) throw error;
-        // Supabase invoke returns Blob for binary content
-        const blob = data instanceof Blob ? data : new Blob([data as ArrayBuffer], { type: "audio/mpeg" });
+
+        if (!res.ok) {
+          let msg = `TTS ${res.status}`;
+          try {
+            const j = await res.json();
+            msg = j.error || msg;
+          } catch {}
+          throw new Error(msg);
+        }
+
+        // Notify user once if the server fell back to the backup provider
+        if (res.headers.get("X-TTS-Fallback") === "true" && !fallbackNotified) {
+          fallbackNotified = true;
+          toast.warning(reasonMessage(res.headers.get("X-TTS-Fallback-Reason")));
+        }
+
+        const blob = await res.blob();
         url = URL.createObjectURL(blob);
         cache.set(text, url);
       }
@@ -36,7 +72,7 @@ export function useSpeak() {
       await audio.play();
     } catch (e) {
       console.error("TTS error", e);
-      toast.error("تعذر تشغيل الصوت");
+      toast.error("تعذر تشغيل الصوت. حاول مرة أخرى.");
       setSpeakingKey(null);
     }
   }, []);
