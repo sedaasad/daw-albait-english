@@ -13,6 +13,11 @@ export interface Profile {
   last_login_date: string | null;
   is_approved: boolean;
   completed_lessons: string[];
+  cefr_level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2" | null;
+  placement_score: number | null;
+  placement_completed: boolean;
+  placement_strengths: string[];
+  placement_weaknesses: string[];
 }
 
 interface AuthContextValue {
