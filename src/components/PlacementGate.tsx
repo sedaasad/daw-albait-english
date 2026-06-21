@@ -2,7 +2,17 @@ import { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 
-const EXEMPT_PATHS = ["/placement-test", "/auth", "/pending-approval", "/"];
+const EXEMPT_PATHS = [
+  "/",
+  "/auth",
+  "/auth/forgot-password",
+  "/auth/forget-password",
+  "/auth/Forgetpassword",
+  "/forgot-password",
+  "/reset-password",
+  "/pending-approval",
+  "/placement-test",
+];
 
 /**
  * Redirects authenticated users who have not completed placement to /placement-test.
