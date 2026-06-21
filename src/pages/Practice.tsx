@@ -4,6 +4,8 @@ import { Card } from "@/components/ui/card";
 import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VERBS } from "@/data/curriculum";
+import { SpeechToTextPractice } from "@/components/lesson/SpeechToTextPractice";
+
 
 export default function Practice() {
   const [idx, setIdx] = useState(0);
