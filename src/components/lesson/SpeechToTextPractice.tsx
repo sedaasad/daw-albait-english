@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { Mic, Square, Loader2, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Mic, Square, Loader2, Trash2, Check, X, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { SpeakButton } from "./SpeakButton";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,7 +15,15 @@ type Attempt = {
   id: string;
   transcript: string;
   target_text: string | null;
+  accuracy_percentage: number | null;
   created_at: string;
+};
+
+type WordDiff = {
+  correct: string[];
+  missing: string[];
+  extra: string[];
+  accuracy: number;
 };
 
 const TARGET_SENTENCES = [
@@ -27,12 +37,51 @@ const TARGET_SENTENCES = [
   "The weather is beautiful this morning.",
 ];
 
+function normalize(text: string): string[] {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s']/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
+
+export function compareWords(target: string, spoken: string): WordDiff {
+  const t = normalize(target);
+  const s = normalize(spoken);
+  const sCounts = new Map<string, number>();
+  s.forEach((w) => sCounts.set(w, (sCounts.get(w) ?? 0) + 1));
+
+  const correct: string[] = [];
+  const missing: string[] = [];
+  for (const w of t) {
+    const c = sCounts.get(w) ?? 0;
+    if (c > 0) {
+      correct.push(w);
+      sCounts.set(w, c - 1);
+    } else {
+      missing.push(w);
+    }
+  }
+  const extra: string[] = [];
+  sCounts.forEach((count, w) => {
+    for (let i = 0; i < count; i++) extra.push(w);
+  });
+  const accuracy = t.length === 0 ? 0 : Math.round((correct.length / t.length) * 100);
+  return { correct, missing, extra, accuracy };
+}
+
 function pickMimeType(): string | null {
   const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
   for (const t of candidates) {
     if (typeof MediaRecorder !== "undefined" && MediaRecorder.isTypeSupported(t)) return t;
   }
   return null;
+}
+
+function accuracyColor(pct: number): string {
+  if (pct >= 85) return "text-green-600";
+  if (pct >= 60) return "text-amber-600";
+  return "text-destructive";
 }
 
 export function SpeechToTextPractice() {
@@ -48,6 +97,10 @@ export function SpeechToTextPractice() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const target = TARGET_SENTENCES[idx];
+  const diff = useMemo(
+    () => (lastTranscript ? compareWords(target, lastTranscript) : null),
+    [lastTranscript, target],
+  );
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -59,7 +112,7 @@ export function SpeechToTextPractice() {
   async function loadHistory() {
     const { data, error } = await supabase
       .from("speech_attempts")
-      .select("id, transcript, target_text, created_at")
+      .select("id, transcript, target_text, accuracy_percentage, created_at")
       .order("created_at", { ascending: false })
       .limit(10);
     if (error) {
@@ -114,7 +167,6 @@ export function SpeechToTextPractice() {
 
     setBusy(true);
     try {
-      // 1) Upload to recordings bucket
       const ext = mimeType.includes("mp4") ? "mp4" : "webm";
       const path = `${userId}/${Date.now()}.${ext}`;
       const { error: upErr } = await supabase.storage
@@ -126,7 +178,6 @@ export function SpeechToTextPractice() {
         return;
       }
 
-      // 2) Transcribe via edge function
       const form = new FormData();
       form.append("file", blob, `recording.${ext}`);
       const { data, error } = await supabase.functions.invoke("speech-to-text", { body: form });
@@ -139,12 +190,14 @@ export function SpeechToTextPractice() {
       const text: string = (data?.text ?? "").trim();
       setLastTranscript(text);
 
-      // 3) Save attempt row
+      const localDiff = compareWords(target, text);
+
       const { error: insErr } = await supabase.from("speech_attempts").insert({
         user_id: userId,
         audio_path: path,
         target_text: target,
         transcript: text,
+        accuracy_percentage: localDiff.accuracy,
       });
       if (insErr) {
         console.error("insert error", insErr);
@@ -166,17 +219,20 @@ export function SpeechToTextPractice() {
     setHistory((h) => h.filter((a) => a.id !== id));
   }
 
+  const targetWords = useMemo(() => normalize(target), [target]);
+  const correctSet = useMemo(() => new Set(diff?.correct ?? []), [diff]);
+
   return (
-    <Card className="p-5 shadow-card bg-gradient-to-br from-primary/5 to-secondary/5">
+    <Card className="p-4 sm:p-5 shadow-card bg-gradient-to-br from-primary/5 to-secondary/5">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-black text-primary text-base">🎙️ تدرّب على النطق بالذكاء الاصطناعي</h3>
         <span className="text-xs text-muted-foreground font-en">{idx + 1}/{TARGET_SENTENCES.length}</span>
       </div>
 
       <div className="bg-card rounded-xl p-4 mb-3">
-        <p className="text-xs text-muted-foreground mb-1">Target Sentence</p>
+        <p className="text-xs text-muted-foreground mb-1">الجملة المستهدفة · Target</p>
         <div className="flex items-center justify-between gap-2">
-          <p className="font-en text-base font-bold text-foreground flex-1" dir="ltr">{target}</p>
+          <p className="font-en text-base font-bold text-foreground flex-1 leading-relaxed" dir="ltr">{target}</p>
           <SpeakButton text={target} size="md" />
         </div>
       </div>
@@ -206,43 +262,125 @@ export function SpeechToTextPractice() {
         </Button>
       </div>
 
-      {lastTranscript && (
-        <div className="mt-3 bg-card rounded-xl p-4 space-y-2 border border-primary/10">
-          <p className="text-xs text-muted-foreground">Your Speech</p>
-          <p className="font-en text-base font-bold" dir="ltr">{lastTranscript}</p>
+      {lastTranscript && diff && (
+        <div className="mt-3 space-y-3">
+          {/* Accuracy */}
+          <div className="bg-card rounded-xl p-4 border border-primary/10">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-muted-foreground">نسبة المطابقة · Accuracy</p>
+              <span className={cn("font-black text-lg font-en", accuracyColor(diff.accuracy))}>
+                {diff.accuracy}%
+              </span>
+            </div>
+            <Progress value={diff.accuracy} className="h-2" />
+          </div>
+
+          {/* Your speech (raw) */}
+          <div className="bg-card rounded-xl p-4 border border-border/40">
+            <p className="text-xs text-muted-foreground mb-1">ما قلته · Your Speech</p>
+            <p className="font-en text-base font-bold" dir="ltr">{lastTranscript || "—"}</p>
+          </div>
+
+          {/* Word-by-word target comparison */}
+          <div className="bg-card rounded-xl p-4 border border-border/40">
+            <p className="text-xs text-muted-foreground mb-2">المقارنة كلمة بكلمة · Word match</p>
+            <div className="flex flex-wrap gap-1.5" dir="ltr">
+              {targetWords.map((w, i) => {
+                const ok = correctSet.has(w);
+                return (
+                  <span
+                    key={`${w}-${i}`}
+                    className={cn(
+                      "px-2 py-1 rounded-md text-sm font-en font-semibold",
+                      ok
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                        : "bg-destructive/10 text-destructive line-through",
+                    )}
+                  >
+                    {w}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Missing & extra */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-card rounded-xl p-3 border border-border/40">
+              <p className="text-xs font-bold text-destructive mb-1 flex items-center gap-1">
+                <X className="size-3.5" /> كلمات ناقصة · Missing
+              </p>
+              {diff.missing.length === 0 ? (
+                <p className="text-xs text-muted-foreground">لا يوجد ✓</p>
+              ) : (
+                <div className="flex flex-wrap gap-1" dir="ltr">
+                  {diff.missing.map((w, i) => (
+                    <Badge key={`m-${w}-${i}`} variant="destructive" className="font-en">{w}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="bg-card rounded-xl p-3 border border-border/40">
+              <p className="text-xs font-bold text-amber-600 mb-1 flex items-center gap-1">
+                <Plus className="size-3.5" /> كلمات زائدة · Extra
+              </p>
+              {diff.extra.length === 0 ? (
+                <p className="text-xs text-muted-foreground">لا يوجد ✓</p>
+              ) : (
+                <div className="flex flex-wrap gap-1" dir="ltr">
+                  {diff.extra.map((w, i) => (
+                    <Badge key={`e-${w}-${i}`} variant="secondary" className="font-en bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">{w}</Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {diff.correct.length > 0 && (
+            <div className="bg-card rounded-xl p-3 border border-border/40">
+              <p className="text-xs font-bold text-green-700 mb-1 flex items-center gap-1">
+                <Check className="size-3.5" /> كلمات صحيحة · Correct
+              </p>
+              <div className="flex flex-wrap gap-1" dir="ltr">
+                {diff.correct.map((w, i) => (
+                  <Badge key={`c-${w}-${i}`} className="font-en bg-green-100 text-green-800 hover:bg-green-100 dark:bg-green-900/30 dark:text-green-300">{w}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
       {history.length > 0 && (
         <div className="mt-5">
-          <h4 className="font-black text-sm mb-2">آخر 10 محاولات</h4>
+          <h4 className="font-black text-sm mb-2">آخر 10 محاولات · History</h4>
           <div className="space-y-2">
-            {history.map((a) => (
-              <div key={a.id} className={cn("bg-card rounded-xl p-3 border border-border/40")}>
-                <div className="flex items-start justify-between gap-2 mb-1">
-                  <span className="text-[10px] text-muted-foreground">
-                    {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: ar })}
-                  </span>
-                  <button
-                    onClick={() => removeAttempt(a.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="حذف"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                </div>
-                {a.target_text && (
-                  <div className="mb-1">
-                    <p className="text-[10px] text-muted-foreground">Target</p>
-                    <p className="font-en text-xs" dir="ltr">{a.target_text}</p>
+            {history.map((a) => {
+              const pct = a.accuracy_percentage ?? 0;
+              return (
+                <div key={a.id} className="bg-card rounded-xl p-3 border border-border/40">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className={cn("font-en font-black text-sm", accuracyColor(pct))}>{pct}%</span>
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(a.created_at), { addSuffix: true, locale: ar })}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => removeAttempt(a.id)}
+                      className="text-muted-foreground hover:text-destructive"
+                      aria-label="حذف"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
                   </div>
-                )}
-                <div>
-                  <p className="text-[10px] text-muted-foreground">Your Speech</p>
-                  <p className="font-en text-xs font-bold" dir="ltr">{a.transcript || "—"}</p>
+                  {a.target_text && (
+                    <p className="font-en text-xs text-muted-foreground truncate" dir="ltr">🎯 {a.target_text}</p>
+                  )}
+                  <p className="font-en text-xs font-bold truncate" dir="ltr">🗣️ {a.transcript || "—"}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
