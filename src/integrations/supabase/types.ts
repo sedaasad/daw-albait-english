@@ -209,6 +209,54 @@ export type Database = {
           },
         ]
       }
+      speech_attempts: {
+        Row: {
+          audio_path: string | null
+          created_at: string
+          id: string
+          lesson_id: string | null
+          recording_id: string | null
+          target_text: string | null
+          transcript: string
+          user_id: string
+        }
+        Insert: {
+          audio_path?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          recording_id?: string | null
+          target_text?: string | null
+          transcript?: string
+          user_id: string
+        }
+        Update: {
+          audio_path?: string | null
+          created_at?: string
+          id?: string
+          lesson_id?: string | null
+          recording_id?: string | null
+          target_text?: string | null
+          transcript?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "speech_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "speech_attempts_recording_id_fkey"
+            columns: ["recording_id"]
+            isOneToOne: false
+            referencedRelation: "recordings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
