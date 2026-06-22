@@ -44,17 +44,32 @@
     --input: 222 40% 90%;
     --ring: 231 64% 30%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(231 64% 30%), hsl(187 100% 42%));
     --gradient-soft: linear-gradient(180deg, hsl(222 100% 97%), hsl(0 0% 100%));
     --gradient-warm: linear-gradient(135deg, hsl(33 100% 50%), hsl(14 100% 57%));
 
-    --shadow-card: 0 4px 20px -4px hsl(231 64% 30% / 0.08);
-    --shadow-elevated: 0 10px 40px -10px hsl(231 64% 30% / 0.25);
-    --shadow-glow: 0 0 40px hsl(187 100% 42% / 0.35);
+    /* Liquid Glass tokens */
+    --glass-bg: 0 0% 100% / 0.55;
+    --glass-bg-strong: 0 0% 100% / 0.72;
+    --glass-border: 0 0% 100% / 0.65;
+    --glass-highlight: 0 0% 100% / 0.9;
+    --glass-shadow: 231 40% 20% / 0.10;
+    --glass-blur: 22px;
+    --glass-blur-strong: 32px;
+    --glass-saturate: 180%;
 
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-card: 0 1px 0 0 hsl(var(--glass-highlight)) inset,
+                   0 6px 20px -8px hsl(var(--glass-shadow)),
+                   0 2px 6px -2px hsl(var(--glass-shadow));
+    --shadow-elevated: 0 1px 0 0 hsl(var(--glass-highlight)) inset,
+                       0 20px 50px -20px hsl(var(--glass-shadow)),
+                       0 8px 18px -8px hsl(var(--glass-shadow));
+    --shadow-glow: 0 0 40px hsl(187 100% 42% / 0.30);
+
+    --ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
+    --transition-smooth: all 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 6% 11%;
