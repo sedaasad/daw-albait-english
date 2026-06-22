@@ -418,13 +418,14 @@ export const MODULES: Module[] = [
             titleAr: "التسوق — Shopping",
             data: {
               exchanges: [
-                { sp: 1, en: "Excuse me, where can I find the bread?", ar: "من فضلك، أين أجد الخبز؟" },
-                { sp: 0, en: "It's in aisle four, next to the dairy section.", ar: "في الممر الرابع، بجانب قسم الألبان." },
-                { sp: 1, en: "Thank you. Do you have fresh milk?", ar: "شكراً. هل لديكم حليب طازج؟" },
-                { sp: 0, en: "Yes, it's in the refrigerator on the left.", ar: "نعم، في الثلاجة على اليسار." },
-                { sp: 1, en: "Are there any discounts today?", ar: "هل توجد تخفيضات اليوم؟" },
-                { sp: 0, en: "Yes, the items on this shelf are half price.", ar: "نعم، المنتجات على هذا الرف بنصف السعر." },
+                { sp: 1, en: "Excuse me, where can I find the bread?", ar: "من فضلك، أين أجد الخبز؟", keyword: { en: "bread", ar: "خبز" } },
+                { sp: 0, en: "It's in aisle four, next to the dairy section.", ar: "في الممر الرابع، بجانب قسم الألبان.", keyword: { en: "aisle", ar: "ممر" } },
+                { sp: 1, en: "Thank you. Do you have fresh milk?", ar: "شكراً. هل لديكم حليب طازج؟", keyword: { en: "fresh", ar: "طازج" } },
+                { sp: 0, en: "Yes, it's in the refrigerator on the left.", ar: "نعم، في الثلاجة على اليسار.", keyword: { en: "refrigerator", ar: "ثلاجة" } },
+                { sp: 1, en: "Are there any discounts today?", ar: "هل توجد تخفيضات اليوم؟", keyword: { en: "discounts", ar: "تخفيضات" } },
+                { sp: 0, en: "Yes, the items on this shelf are half price.", ar: "نعم، المنتجات على هذا الرف بنصف السعر.", keyword: { en: "shelf", ar: "رف" } },
               ],
+
             },
           },
           {
