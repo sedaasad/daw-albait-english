@@ -500,13 +500,14 @@ export const MODULES: Module[] = [
             titleAr: "تسجيل الوصول — Check-in",
             data: {
               exchanges: [
-                { sp: 0, en: "Good morning. May I see your passport and ticket?", ar: "صباح الخير. هل يمكنني رؤية جواز سفرك وتذكرتك؟" },
-                { sp: 1, en: "Here you are.", ar: "تفضل." },
-                { sp: 0, en: "How many bags are you checking in?", ar: "كم حقيبة ستسجلها؟" },
-                { sp: 1, en: "Just one suitcase, and this is my carry-on.", ar: "حقيبة واحدة فقط، وهذه حقيبة اليد." },
-                { sp: 0, en: "Your gate is B12. Boarding starts at 10:30.", ar: "بوابتك هي B12. الصعود يبدأ الساعة 10:30." },
-                { sp: 1, en: "Thank you. Have a nice day.", ar: "شكراً. أتمنى لك يوماً سعيداً." },
+                { sp: 0, en: "Good morning. May I see your passport and ticket?", ar: "صباح الخير. هل يمكنني رؤية جواز سفرك وتذكرتك؟", keyword: { en: "passport", ar: "جواز سفر" } },
+                { sp: 1, en: "Here you are.", ar: "تفضل.", keyword: { en: "here", ar: "هنا" } },
+                { sp: 0, en: "How many bags are you checking in?", ar: "كم حقيبة ستسجلها؟", keyword: { en: "checking in", ar: "تسجيل الوصول" } },
+                { sp: 1, en: "Just one suitcase, and this is my carry-on.", ar: "حقيبة واحدة فقط، وهذه حقيبة اليد.", keyword: { en: "carry-on", ar: "حقيبة يد" } },
+                { sp: 0, en: "Your gate is B12. Boarding starts at 10:30.", ar: "بوابتك هي B12. الصعود يبدأ الساعة 10:30.", keyword: { en: "gate", ar: "بوابة" } },
+                { sp: 1, en: "Thank you. Have a nice day.", ar: "شكراً. أتمنى لك يوماً سعيداً.", keyword: { en: "nice", ar: "سعيد" } },
               ],
+
             },
           },
           {
