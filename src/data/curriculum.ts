@@ -459,13 +459,14 @@ export const MODULES: Module[] = [
             titleAr: "استعارة كتاب — Borrowing a Book",
             data: {
               exchanges: [
-                { sp: 1, en: "Hello, I'd like to borrow this book.", ar: "مرحباً، أود استعارة هذا الكتاب." },
-                { sp: 0, en: "Do you have a library card?", ar: "هل لديك بطاقة مكتبة؟" },
-                { sp: 1, en: "Yes, here it is.", ar: "نعم، تفضل." },
-                { sp: 0, en: "You can keep it for two weeks.", ar: "يمكنك الاحتفاظ به لمدة أسبوعين." },
-                { sp: 1, en: "Can I renew it online?", ar: "هل يمكنني تجديده عبر الإنترنت؟" },
-                { sp: 0, en: "Yes, please return it on time to avoid a fine.", ar: "نعم، من فضلك أعده في الموعد لتجنب الغرامة." },
+                { sp: 1, en: "Hello, I'd like to borrow this book.", ar: "مرحباً، أود استعارة هذا الكتاب.", keyword: { en: "borrow", ar: "يستعير" } },
+                { sp: 0, en: "Do you have a library card?", ar: "هل لديك بطاقة مكتبة؟", keyword: { en: "library card", ar: "بطاقة مكتبة" } },
+                { sp: 1, en: "Yes, here it is.", ar: "نعم، تفضل.", keyword: { en: "here", ar: "هنا" } },
+                { sp: 0, en: "You can keep it for two weeks.", ar: "يمكنك الاحتفاظ به لمدة أسبوعين.", keyword: { en: "weeks", ar: "أسابيع" } },
+                { sp: 1, en: "Can I renew it online?", ar: "هل يمكنني تجديده عبر الإنترنت؟", keyword: { en: "renew", ar: "تجديد" } },
+                { sp: 0, en: "Yes, please return it on time to avoid a fine.", ar: "نعم، من فضلك أعده في الموعد لتجنب الغرامة.", keyword: { en: "fine", ar: "غرامة" } },
               ],
+
             },
           },
           {
