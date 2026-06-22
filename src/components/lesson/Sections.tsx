@@ -1,4 +1,7 @@
+import { useMemo, useState } from "react";
+import { Check, X, MessageSquare, Sparkles, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type { RuleData, FormulaData, DialogueData, VocabData } from "@/data/curriculum";
 import { SpeakButton } from "./SpeakButton";
 
