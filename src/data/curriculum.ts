@@ -583,15 +583,16 @@ export const MODULES: Module[] = [
             titleAr: "طلب الطعام — Ordering Food",
             data: {
               exchanges: [
-                { sp: 0, en: "Good evening. A table for how many?", ar: "مساء الخير. طاولة لكم شخصاً؟" },
-                { sp: 1, en: "For two, please.", ar: "لشخصين، من فضلك." },
-                { sp: 0, en: "Here is the menu. Can I get you something to drink?", ar: "تفضل القائمة. هل أحضر لك شيئاً للشرب؟" },
-                { sp: 1, en: "Water, please. And we'd like to order now.", ar: "ماء من فضلك. ونرغب في الطلب الآن." },
-                { sp: 0, en: "Sure. What would you like?", ar: "بالتأكيد. ماذا تريد؟" },
-                { sp: 1, en: "I'll have the grilled chicken with rice.", ar: "سآخذ الدجاج المشوي مع الأرز." },
-                { sp: 0, en: "Excellent choice. Anything for dessert?", ar: "اختيار ممتاز. هل تريد حلوى؟" },
-                { sp: 1, en: "Yes, the chocolate cake, please. And the bill after.", ar: "نعم، كعكة الشوكولاتة من فضلك. والفاتورة بعد ذلك." },
+                { sp: 0, en: "Good evening. A table for how many?", ar: "مساء الخير. طاولة لكم شخصاً؟", keyword: { en: "table", ar: "طاولة" } },
+                { sp: 1, en: "For two, please.", ar: "لشخصين، من فضلك.", keyword: { en: "please", ar: "من فضلك" } },
+                { sp: 0, en: "Here is the menu. Can I get you something to drink?", ar: "تفضل القائمة. هل أحضر لك شيئاً للشرب؟", keyword: { en: "menu", ar: "قائمة الطعام" } },
+                { sp: 1, en: "Water, please. And we'd like to order now.", ar: "ماء من فضلك. ونرغب في الطلب الآن.", keyword: { en: "order", ar: "طلب" } },
+                { sp: 0, en: "Sure. What would you like?", ar: "بالتأكيد. ماذا تريد؟", keyword: { en: "would like", ar: "تريد" } },
+                { sp: 1, en: "I'll have the grilled chicken with rice.", ar: "سآخذ الدجاج المشوي مع الأرز.", keyword: { en: "grilled chicken", ar: "دجاج مشوي" } },
+                { sp: 0, en: "Excellent choice. Anything for dessert?", ar: "اختيار ممتاز. هل تريد حلوى؟", keyword: { en: "dessert", ar: "حلوى" } },
+                { sp: 1, en: "Yes, the chocolate cake, please. And the bill after.", ar: "نعم، كعكة الشوكولاتة من فضلك. والفاتورة بعد ذلك.", keyword: { en: "bill", ar: "الفاتورة" } },
               ],
+
             },
           },
           {
