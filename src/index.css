@@ -100,6 +100,12 @@
     --border: 231 20% 22%;
     --input: 231 20% 22%;
     --ring: 187 100% 50%;
+
+    --glass-bg: 231 28% 14% / 0.55;
+    --glass-bg-strong: 231 28% 16% / 0.78;
+    --glass-border: 0 0% 100% / 0.12;
+    --glass-highlight: 0 0% 100% / 0.16;
+    --glass-shadow: 0 0% 0% / 0.55;
   }
 }
 
@@ -116,6 +122,10 @@
     @apply bg-background text-foreground antialiased;
     font-family: "Cairo", "Tajawal", system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, hsl(187 100% 60% / 0.10), transparent 60%),
+      radial-gradient(1000px 500px at -10% 110%, hsl(231 100% 60% / 0.10), transparent 60%);
+    background-attachment: fixed;
   }
 
   .font-en {
