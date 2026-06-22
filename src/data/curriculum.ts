@@ -25,8 +25,9 @@ export interface FormulaData {
 }
 
 export interface DialogueData {
-  exchanges: { sp: number; en: string; ar: string }[];
+  exchanges: { sp: number; en: string; ar: string; keyword?: { en: string; ar: string } }[];
 }
+
 
 export interface VocabData {
   words: { en: string; ar: string }[];
