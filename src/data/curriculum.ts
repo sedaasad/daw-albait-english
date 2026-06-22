@@ -336,7 +336,7 @@ export const MODULES: Module[] = [
     icon: "💬",
     bg: "from-orange-500 to-orange-800",
     level: "beginner",
-    total: 6,
+    total: 7,
     locked: false,
     lessons: [
       {
