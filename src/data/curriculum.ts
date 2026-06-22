@@ -391,14 +391,15 @@ export const MODULES: Module[] = [
             titleAr: "عند الطبيب",
             data: {
               exchanges: [
-                { sp: 1, en: "I'm not feeling well. I'd like to see a doctor.", ar: "لا أشعر بتحسن. أريد رؤية الطبيب." },
-                { sp: 0, en: "Do you have an appointment?", ar: "هل لديك موعد؟" },
-                { sp: 1, en: "No, it's an emergency.", ar: "لا، إنها حالة طارئة." },
-                { sp: 0, en: "Please fill out this form and have a seat.", ar: "من فضلك املأ هذا النموذج واجلس." },
-                { sp: 2, en: "Hello. What seems to be the problem?", ar: "مرحباً. ما المشكلة؟" },
-                { sp: 1, en: "I've had a high fever and sore throat since yesterday.", ar: "لدي حمى شديدة والتهاب في الحلق منذ أمس." },
-                { sp: 2, en: "It looks like a throat infection. I'll prescribe antibiotics.", ar: "يبدو أنها عدوى في الحلق. سأصف مضاداً حيوياً." },
+                { sp: 1, en: "I'm not feeling well. I'd like to see a doctor.", ar: "لا أشعر بتحسن. أريد رؤية الطبيب.", keyword: { en: "doctor", ar: "طبيب" } },
+                { sp: 0, en: "Do you have an appointment?", ar: "هل لديك موعد؟", keyword: { en: "appointment", ar: "موعد" } },
+                { sp: 1, en: "No, it's an emergency.", ar: "لا، إنها حالة طارئة.", keyword: { en: "emergency", ar: "حالة طارئة" } },
+                { sp: 0, en: "Please fill out this form and have a seat.", ar: "من فضلك املأ هذا النموذج واجلس.", keyword: { en: "form", ar: "نموذج" } },
+                { sp: 2, en: "Hello. What seems to be the problem?", ar: "مرحباً. ما المشكلة؟", keyword: { en: "problem", ar: "مشكلة" } },
+                { sp: 1, en: "I've had a high fever and sore throat since yesterday.", ar: "لدي حمى شديدة والتهاب في الحلق منذ أمس.", keyword: { en: "fever", ar: "حمى" } },
+                { sp: 2, en: "It looks like a throat infection. I'll prescribe antibiotics.", ar: "يبدو أنها عدوى في الحلق. سأصف مضاداً حيوياً.", keyword: { en: "antibiotics", ar: "مضاد حيوي" } },
               ],
+
             },
           },
         ],
