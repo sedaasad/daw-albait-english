@@ -404,6 +404,209 @@ export const MODULES: Module[] = [
           { q: "كيف تقول 'أريد رؤية الطبيب'؟", opts: ["I want doctor", "I'd like to see a doctor", "I need see doctor", "Doctor please"], c: 1, exp: "I'd like to see a doctor = أريد رؤية الطبيب" },
         ],
       },
+      {
+        id: "supermarket",
+        titleAr: "في السوبر ماركت",
+        titleEn: "At the Supermarket",
+        mins: 15,
+        sections: [
+          {
+            type: "dialogue",
+            titleAr: "التسوق — Shopping",
+            data: {
+              exchanges: [
+                { sp: 1, en: "Excuse me, where can I find the bread?", ar: "من فضلك، أين أجد الخبز؟" },
+                { sp: 0, en: "It's in aisle four, next to the dairy section.", ar: "في الممر الرابع، بجانب قسم الألبان." },
+                { sp: 1, en: "Thank you. Do you have fresh milk?", ar: "شكراً. هل لديكم حليب طازج؟" },
+                { sp: 0, en: "Yes, it's in the refrigerator on the left.", ar: "نعم، في الثلاجة على اليسار." },
+                { sp: 1, en: "Are there any discounts today?", ar: "هل توجد تخفيضات اليوم؟" },
+                { sp: 0, en: "Yes, the items on this shelf are half price.", ar: "نعم، المنتجات على هذا الرف بنصف السعر." },
+              ],
+            },
+          },
+          {
+            type: "vocab",
+            titleAr: "مفردات السوبر ماركت",
+            data: {
+              words: [
+                { en: "Aisle", ar: "ممر" },
+                { en: "Shelf", ar: "رف" },
+                { en: "Cart", ar: "عربة تسوق" },
+                { en: "Dairy", ar: "ألبان" },
+                { en: "Discount", ar: "تخفيض" },
+                { en: "Fresh", ar: "طازج" },
+              ],
+            },
+          },
+        ],
+        quiz: [
+          { q: "ما معنى 'Aisle'؟", opts: ["رف", "ممر", "عربة", "ثلاجة"], c: 1, exp: "Aisle = ممر" },
+          { q: "ما معنى 'Discount'؟", opts: ["سعر", "تخفيض", "دفع", "فاتورة"], c: 1, exp: "Discount = تخفيض" },
+        ],
+      },
+      {
+        id: "library",
+        titleAr: "في المكتبة",
+        titleEn: "At the Library",
+        mins: 15,
+        sections: [
+          {
+            type: "dialogue",
+            titleAr: "استعارة كتاب — Borrowing a Book",
+            data: {
+              exchanges: [
+                { sp: 1, en: "Hello, I'd like to borrow this book.", ar: "مرحباً، أود استعارة هذا الكتاب." },
+                { sp: 0, en: "Do you have a library card?", ar: "هل لديك بطاقة مكتبة؟" },
+                { sp: 1, en: "Yes, here it is.", ar: "نعم، تفضل." },
+                { sp: 0, en: "You can keep it for two weeks.", ar: "يمكنك الاحتفاظ به لمدة أسبوعين." },
+                { sp: 1, en: "Can I renew it online?", ar: "هل يمكنني تجديده عبر الإنترنت؟" },
+                { sp: 0, en: "Yes, please return it on time to avoid a fine.", ar: "نعم، من فضلك أعده في الموعد لتجنب الغرامة." },
+              ],
+            },
+          },
+          {
+            type: "vocab",
+            titleAr: "مفردات المكتبة",
+            data: {
+              words: [
+                { en: "Borrow", ar: "يستعير" },
+                { en: "Return", ar: "يُعيد" },
+                { en: "Library card", ar: "بطاقة المكتبة" },
+                { en: "Fine", ar: "غرامة" },
+                { en: "Shelf", ar: "رف" },
+                { en: "Quiet", ar: "هادئ" },
+              ],
+            },
+          },
+        ],
+        quiz: [
+          { q: "ما معنى 'Borrow'؟", opts: ["يُعيد", "يستعير", "يشتري", "يبيع"], c: 1, exp: "Borrow = يستعير" },
+          { q: "ما معنى 'Fine'؟", opts: ["جيد", "غرامة", "هدية", "كتاب"], c: 1, exp: "Fine هنا = غرامة" },
+        ],
+      },
+      {
+        id: "airport",
+        titleAr: "في المطار",
+        titleEn: "At the Airport",
+        mins: 20,
+        sections: [
+          {
+            type: "dialogue",
+            titleAr: "تسجيل الوصول — Check-in",
+            data: {
+              exchanges: [
+                { sp: 0, en: "Good morning. May I see your passport and ticket?", ar: "صباح الخير. هل يمكنني رؤية جواز سفرك وتذكرتك؟" },
+                { sp: 1, en: "Here you are.", ar: "تفضل." },
+                { sp: 0, en: "How many bags are you checking in?", ar: "كم حقيبة ستسجلها؟" },
+                { sp: 1, en: "Just one suitcase, and this is my carry-on.", ar: "حقيبة واحدة فقط، وهذه حقيبة اليد." },
+                { sp: 0, en: "Your gate is B12. Boarding starts at 10:30.", ar: "بوابتك هي B12. الصعود يبدأ الساعة 10:30." },
+                { sp: 1, en: "Thank you. Have a nice day.", ar: "شكراً. أتمنى لك يوماً سعيداً." },
+              ],
+            },
+          },
+          {
+            type: "vocab",
+            titleAr: "مفردات المطار",
+            data: {
+              words: [
+                { en: "Passport", ar: "جواز سفر" },
+                { en: "Boarding pass", ar: "بطاقة الصعود" },
+                { en: "Gate", ar: "بوابة" },
+                { en: "Luggage", ar: "أمتعة" },
+                { en: "Carry-on", ar: "حقيبة يد" },
+                { en: "Flight", ar: "رحلة" },
+              ],
+            },
+          },
+        ],
+        quiz: [
+          { q: "ما معنى 'Gate'؟", opts: ["بوابة", "تذكرة", "رحلة", "مقعد"], c: 0, exp: "Gate = بوابة الصعود" },
+          { q: "ما معنى 'Luggage'؟", opts: ["جواز", "أمتعة", "مقعد", "طائرة"], c: 1, exp: "Luggage = أمتعة" },
+        ],
+      },
+      {
+        id: "cashier",
+        titleAr: "عند الكاشير",
+        titleEn: "At the Cashier",
+        mins: 10,
+        sections: [
+          {
+            type: "dialogue",
+            titleAr: "الدفع — Paying",
+            data: {
+              exchanges: [
+                { sp: 0, en: "Hi! Did you find everything you needed?", ar: "أهلاً! هل وجدت كل ما تحتاجه؟" },
+                { sp: 1, en: "Yes, thank you.", ar: "نعم، شكراً." },
+                { sp: 0, en: "Your total is twenty-five dollars.", ar: "المجموع خمسة وعشرون دولاراً." },
+                { sp: 1, en: "Can I pay by card?", ar: "هل يمكنني الدفع بالبطاقة؟" },
+                { sp: 0, en: "Of course. Please insert your card.", ar: "بالطبع. من فضلك أدخل بطاقتك." },
+                { sp: 1, en: "Could I have a receipt, please?", ar: "هل يمكنني الحصول على إيصال؟" },
+                { sp: 0, en: "Here you go. Have a great day!", ar: "تفضل. أتمنى لك يوماً رائعاً!" },
+              ],
+            },
+          },
+          {
+            type: "vocab",
+            titleAr: "مفردات الكاشير",
+            data: {
+              words: [
+                { en: "Total", ar: "المجموع" },
+                { en: "Cash", ar: "نقداً" },
+                { en: "Card", ar: "بطاقة" },
+                { en: "Receipt", ar: "إيصال" },
+                { en: "Change", ar: "الباقي" },
+                { en: "Bag", ar: "كيس" },
+              ],
+            },
+          },
+        ],
+        quiz: [
+          { q: "ما معنى 'Receipt'؟", opts: ["الباقي", "إيصال", "بطاقة", "نقود"], c: 1, exp: "Receipt = إيصال" },
+          { q: "ما معنى 'Change'؟", opts: ["الباقي", "تغيير الملابس", "بطاقة", "إيصال"], c: 0, exp: "Change هنا = الباقي من النقود" },
+        ],
+      },
+      {
+        id: "restaurant",
+        titleAr: "في المطعم",
+        titleEn: "At the Restaurant",
+        mins: 20,
+        sections: [
+          {
+            type: "dialogue",
+            titleAr: "طلب الطعام — Ordering Food",
+            data: {
+              exchanges: [
+                { sp: 0, en: "Good evening. A table for how many?", ar: "مساء الخير. طاولة لكم شخصاً؟" },
+                { sp: 1, en: "For two, please.", ar: "لشخصين، من فضلك." },
+                { sp: 0, en: "Here is the menu. Can I get you something to drink?", ar: "تفضل القائمة. هل أحضر لك شيئاً للشرب؟" },
+                { sp: 1, en: "Water, please. And we'd like to order now.", ar: "ماء من فضلك. ونرغب في الطلب الآن." },
+                { sp: 0, en: "Sure. What would you like?", ar: "بالتأكيد. ماذا تريد؟" },
+                { sp: 1, en: "I'll have the grilled chicken with rice.", ar: "سآخذ الدجاج المشوي مع الأرز." },
+                { sp: 0, en: "Excellent choice. Anything for dessert?", ar: "اختيار ممتاز. هل تريد حلوى؟" },
+                { sp: 1, en: "Yes, the chocolate cake, please. And the bill after.", ar: "نعم، كعكة الشوكولاتة من فضلك. والفاتورة بعد ذلك." },
+              ],
+            },
+          },
+          {
+            type: "vocab",
+            titleAr: "مفردات المطعم",
+            data: {
+              words: [
+                { en: "Menu", ar: "قائمة الطعام" },
+                { en: "Order", ar: "يطلب" },
+                { en: "Bill", ar: "الفاتورة" },
+                { en: "Waiter", ar: "نادل" },
+                { en: "Dessert", ar: "حلوى" },
+                { en: "Tip", ar: "بقشيش" },
+              ],
+            },
+          },
+        ],
+        quiz: [
+          { q: "ما معنى 'Bill'؟", opts: ["قائمة", "الفاتورة", "حلوى", "نادل"], c: 1, exp: "Bill = الفاتورة" },
+          { q: "كيف تطلب طاولة لشخصين؟", opts: ["Table two", "A table for two, please", "Two table", "I want table"], c: 1, exp: "A table for two, please = طاولة لشخصين من فضلك" },
+        ],
+      },
     ],
   },
   { id: "medical", titleAr: "الإنجليزية الطبية", titleEn: "Medical English", icon: "🏥", bg: "from-red-600 to-red-900", level: "intermediate", total: 12, locked: true, lessons: [] },
