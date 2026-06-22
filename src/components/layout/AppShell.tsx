@@ -11,13 +11,18 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
-      <main className={cn("flex-1", !hideNav && "pb-24")}>{children}</main>
+      <main className={cn("flex-1", !hideNav && "pb-28")}>{children}</main>
       {!hideNav && (
         <nav
           dir="rtl"
-          className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border shadow-elevated safe-bottom"
+          className="fixed bottom-3 inset-x-3 z-40 safe-bottom"
         >
-          <div className={cn("max-w-md mx-auto grid gap-1 px-2 pt-2", isAdmin ? "grid-cols-5" : "grid-cols-4")}>
+          <div
+            className={cn(
+              "max-w-md mx-auto glass-strong glass-highlight rounded-[1.75rem] grid gap-1 px-2 py-2",
+              isAdmin ? "grid-cols-5" : "grid-cols-4",
+            )}
+          >
             <TabLink to="/home" icon={<Home className="size-5" />} label="الرئيسية" />
             <TabLink to="/lessons" icon={<BookOpen className="size-5" />} label="الدروس" />
             <TabLink to="/practice" icon={<Dumbbell className="size-5" />} label="التمارين" />
@@ -36,8 +41,10 @@ function TabLink({ to, icon, label }: { to: string; icon: ReactNode; label: stri
       to={to}
       className={({ isActive }) =>
         cn(
-          "flex flex-col items-center justify-center gap-1 py-2 rounded-xl text-xs font-medium transition-smooth",
-          isActive ? "text-primary bg-muted" : "text-muted-foreground hover:text-foreground"
+          "flex flex-col items-center justify-center gap-1 py-2 rounded-2xl text-xs font-medium transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-95",
+          isActive
+            ? "text-primary bg-primary/10 shadow-card"
+            : "text-muted-foreground hover:text-foreground hover:bg-foreground/5",
         )
       }
     >
