@@ -44,17 +44,32 @@
     --input: 222 40% 90%;
     --ring: 231 64% 30%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
     --gradient-primary: linear-gradient(135deg, hsl(231 64% 30%), hsl(187 100% 42%));
     --gradient-soft: linear-gradient(180deg, hsl(222 100% 97%), hsl(0 0% 100%));
     --gradient-warm: linear-gradient(135deg, hsl(33 100% 50%), hsl(14 100% 57%));
 
-    --shadow-card: 0 4px 20px -4px hsl(231 64% 30% / 0.08);
-    --shadow-elevated: 0 10px 40px -10px hsl(231 64% 30% / 0.25);
-    --shadow-glow: 0 0 40px hsl(187 100% 42% / 0.35);
+    /* Liquid Glass tokens */
+    --glass-bg: 0 0% 100% / 0.55;
+    --glass-bg-strong: 0 0% 100% / 0.72;
+    --glass-border: 0 0% 100% / 0.65;
+    --glass-highlight: 0 0% 100% / 0.9;
+    --glass-shadow: 231 40% 20% / 0.10;
+    --glass-blur: 22px;
+    --glass-blur-strong: 32px;
+    --glass-saturate: 180%;
 
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --shadow-card: 0 1px 0 0 hsl(var(--glass-highlight)) inset,
+                   0 6px 20px -8px hsl(var(--glass-shadow)),
+                   0 2px 6px -2px hsl(var(--glass-shadow));
+    --shadow-elevated: 0 1px 0 0 hsl(var(--glass-highlight)) inset,
+                       0 20px 50px -20px hsl(var(--glass-shadow)),
+                       0 8px 18px -8px hsl(var(--glass-shadow));
+    --shadow-glow: 0 0 40px hsl(187 100% 42% / 0.30);
+
+    --ease-glass: cubic-bezier(0.32, 0.72, 0, 1);
+    --transition-smooth: all 0.32s cubic-bezier(0.32, 0.72, 0, 1);
 
     --sidebar-background: 0 0% 100%;
     --sidebar-foreground: 240 6% 11%;
@@ -85,6 +100,12 @@
     --border: 231 20% 22%;
     --input: 231 20% 22%;
     --ring: 187 100% 50%;
+
+    --glass-bg: 231 28% 14% / 0.55;
+    --glass-bg-strong: 231 28% 16% / 0.78;
+    --glass-border: 0 0% 100% / 0.12;
+    --glass-highlight: 0 0% 100% / 0.16;
+    --glass-shadow: 0 0% 0% / 0.55;
   }
 }
 
@@ -101,6 +122,10 @@
     @apply bg-background text-foreground antialiased;
     font-family: "Cairo", "Tajawal", system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, hsl(187 100% 60% / 0.10), transparent 60%),
+      radial-gradient(1000px 500px at -10% 110%, hsl(231 100% 60% / 0.10), transparent 60%);
+    background-attachment: fixed;
   }
 
   .font-en {
@@ -140,4 +165,57 @@
   .safe-top {
     padding-top: max(0.5rem, env(safe-area-inset-top));
   }
+
+  /* Liquid Glass utilities */
+  .glass {
+    background-color: hsl(var(--glass-bg));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--shadow-card);
+  }
+  .glass-strong {
+    background-color: hsl(var(--glass-bg-strong));
+    backdrop-filter: blur(var(--glass-blur-strong)) saturate(var(--glass-saturate));
+    -webkit-backdrop-filter: blur(var(--glass-blur-strong)) saturate(var(--glass-saturate));
+    border: 1px solid hsl(var(--glass-border));
+    box-shadow: var(--shadow-elevated);
+  }
+  .glass-highlight {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .glass-highlight::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, hsl(var(--glass-highlight)) 0%, transparent 38%);
+    opacity: 0.55;
+    mix-blend-mode: overlay;
+    z-index: 0;
+  }
+  .glass-highlight > * { position: relative; z-index: 1; }
+
+  .hover-lift {
+    transition: transform 0.32s var(--ease-glass), box-shadow 0.32s var(--ease-glass);
+  }
+  .hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+  .press {
+    transition: transform 0.18s var(--ease-glass);
+  }
+  .press:active { transform: scale(0.97); }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass { background-color: hsl(var(--card) / 0.95); }
+  .glass-strong { background-color: hsl(var(--card) / 0.98); }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass, .glass-strong { backdrop-filter: none; -webkit-backdrop-filter: none; background-color: hsl(var(--card) / 0.98); }
 }
