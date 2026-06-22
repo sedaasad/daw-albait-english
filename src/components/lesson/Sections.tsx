@@ -277,19 +277,52 @@ function InteractiveDialogue({ d }: { d: DialogueData }) {
               )}
             >
               {picked === current.en ? (
-                <p className="font-bold">✅ إجابة صحيحة! {current.ar}</p>
+                <div className="space-y-1">
+                  <p className="font-bold">✅ إجابة صحيحة!</p>
+                  {current.keyword && (
+                    <p className="text-xs opacity-80">
+                      الكلمة المفتاحية: <span className="font-en font-bold">{current.keyword.en}</span> = {current.keyword.ar}
+                    </p>
+                  )}
+                </div>
               ) : (
-                <>
-                  <p className="font-bold mb-1">❌ غير صحيح. الإجابة الصحيحة:</p>
-                  <p className="font-en font-bold">{current.en}</p>
-                  <p className="text-xs opacity-80 mt-1">{current.ar}</p>
-                </>
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <X className="w-4 h-4 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-bold">غير صحيح</p>
+                      <p className="text-xs opacity-90">
+                        {picked.includes("don't know") || picked.includes("repeat") || picked.includes("later") || picked.includes("great")
+                          ? "هذا رد عام لا يناسب سياق الحوار."
+                          : picked.toLowerCase().includes("please") && !current.en.toLowerCase().includes("please")
+                          ? "لا نحتاج 'please' في هذا الرد."
+                          : !picked.toLowerCase().includes("please") && current.en.toLowerCase().includes("please")
+                          ? "انقر 'please' (من فضلك) لتكون مهذباً."
+                          : "المعنى أو الترتيب غير دقيق لهذا السياق."}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-white/60 rounded-lg p-2.5 space-y-1">
+                    <p className="text-xs text-muted-foreground">الإجابة الصحيحة:</p>
+                    <p className="font-en font-bold">{current.en}</p>
+                    <p className="text-xs opacity-80">{current.ar}</p>
+                  </div>
+                  {current.keyword && (
+                    <div className="bg-white/60 rounded-lg p-2.5 flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">الكلمة المفتاحية:</span>
+                      <span className="font-en font-bold text-sm">{current.keyword.en}</span>
+                      <span className="text-xs">=</span>
+                      <span className="font-bold text-sm">{current.keyword.ar}</span>
+                    </div>
+                  )}
+                </div>
               )}
               <Button size="sm" className="w-full mt-3" onClick={handleNext}>
                 التالي
               </Button>
             </div>
           )}
+
         </div>
       )}
 
