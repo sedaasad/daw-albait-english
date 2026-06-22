@@ -351,12 +351,13 @@ export const MODULES: Module[] = [
             titleAr: "تسجيل الوصول — Check In",
             data: {
               exchanges: [
-                { sp: 0, en: "Good afternoon. Welcome to the hotel. How can I help you?", ar: "مساء الخير. أهلاً بك. كيف أساعدك؟" },
-                { sp: 1, en: "I have a reservation under the name Ahmed.", ar: "لدي حجز باسم أحمد." },
-                { sp: 0, en: "Let me check... Yes, a single room for two nights.", ar: "دعني أتحقق... غرفة مفردة لليلتين." },
-                { sp: 1, en: "Can I get the Wi-Fi password, please?", ar: "هل يمكنني الحصول على كلمة مرور الواي فاي؟" },
-                { sp: 0, en: "Of course. It's on your key card. Breakfast is included.", ar: "بالطبع. على بطاقة مفتاحك. الإفطار مشمول." },
+                { sp: 0, en: "Good afternoon. Welcome to the hotel. How can I help you?", ar: "مساء الخير. أهلاً بك. كيف أساعدك؟", keyword: { en: "hotel", ar: "فندق" } },
+                { sp: 1, en: "I have a reservation under the name Ahmed.", ar: "لدي حجز باسم أحمد.", keyword: { en: "reservation", ar: "حجز" } },
+                { sp: 0, en: "Let me check... Yes, a single room for two nights.", ar: "دعني أتحقق... غرفة مفردة لليلتين.", keyword: { en: "single room", ar: "غرفة مفردة" } },
+                { sp: 1, en: "Can I get the Wi-Fi password, please?", ar: "هل يمكنني الحصول على كلمة مرور الواي فاي؟", keyword: { en: "password", ar: "كلمة المرور" } },
+                { sp: 0, en: "Of course. It's on your key card. Breakfast is included.", ar: "بالطبع. على بطاقة مفتاحك. الإفطار مشمول.", keyword: { en: "breakfast", ar: "إفطار" } },
               ],
+
             },
           },
           {
