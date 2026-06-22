@@ -541,14 +541,15 @@ export const MODULES: Module[] = [
             titleAr: "الدفع — Paying",
             data: {
               exchanges: [
-                { sp: 0, en: "Hi! Did you find everything you needed?", ar: "أهلاً! هل وجدت كل ما تحتاجه؟" },
-                { sp: 1, en: "Yes, thank you.", ar: "نعم، شكراً." },
-                { sp: 0, en: "Your total is twenty-five dollars.", ar: "المجموع خمسة وعشرون دولاراً." },
-                { sp: 1, en: "Can I pay by card?", ar: "هل يمكنني الدفع بالبطاقة؟" },
-                { sp: 0, en: "Of course. Please insert your card.", ar: "بالطبع. من فضلك أدخل بطاقتك." },
-                { sp: 1, en: "Could I have a receipt, please?", ar: "هل يمكنني الحصول على إيصال؟" },
-                { sp: 0, en: "Here you go. Have a great day!", ar: "تفضل. أتمنى لك يوماً رائعاً!" },
+                { sp: 0, en: "Hi! Did you find everything you needed?", ar: "أهلاً! هل وجدت كل ما تحتاجه؟", keyword: { en: "everything", ar: "كل شيء" } },
+                { sp: 1, en: "Yes, thank you.", ar: "نعم، شكراً.", keyword: { en: "thank you", ar: "شكراً" } },
+                { sp: 0, en: "Your total is twenty-five dollars.", ar: "المجموع خمسة وعشرون دولاراً.", keyword: { en: "total", ar: "المجموع" } },
+                { sp: 1, en: "Can I pay by card?", ar: "هل يمكنني الدفع بالبطاقة؟", keyword: { en: "card", ar: "بطاقة" } },
+                { sp: 0, en: "Of course. Please insert your card.", ar: "بالطبع. من فضلك أدخل بطاقتك.", keyword: { en: "insert", ar: "أدخل" } },
+                { sp: 1, en: "Could I have a receipt, please?", ar: "هل يمكنني الحصول على إيصال؟", keyword: { en: "receipt", ar: "إيصال" } },
+                { sp: 0, en: "Here you go. Have a great day!", ar: "تفضل. أتمنى لك يوماً رائعاً!", keyword: { en: "great", ar: "رائع" } },
               ],
+
             },
           },
           {
