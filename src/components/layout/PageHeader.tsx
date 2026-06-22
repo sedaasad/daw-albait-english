@@ -17,8 +17,10 @@ export function PageHeader({ title, subtitle, back, right, variant = "default" }
     <header
       dir="rtl"
       className={cn(
-        "safe-top px-4 pt-4 pb-5",
-        variant === "gradient" && "gradient-primary text-primary-foreground rounded-b-3xl shadow-elevated"
+        "safe-top px-4 pt-4 pb-5 sticky top-0 z-30",
+        variant === "gradient"
+          ? "gradient-primary text-primary-foreground rounded-b-3xl shadow-elevated"
+          : "glass glass-highlight border-0 border-b border-white/40 rounded-b-3xl",
       )}
     >
       <div className="max-w-md mx-auto flex items-center gap-3">
@@ -26,10 +28,10 @@ export function PageHeader({ title, subtitle, back, right, variant = "default" }
           <button
             onClick={() => navigate(-1)}
             className={cn(
-              "size-9 rounded-full flex items-center justify-center transition-smooth",
+              "size-10 rounded-full flex items-center justify-center transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-90",
               variant === "gradient"
                 ? "bg-white/20 hover:bg-white/30 text-primary-foreground"
-                : "bg-muted hover:bg-muted/70 text-foreground"
+                : "glass-strong text-foreground hover:bg-foreground/10",
             )}
             aria-label="رجوع"
           >
