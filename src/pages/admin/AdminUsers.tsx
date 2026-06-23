@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Crown } from "lucide-react";
+import { Check, X, Crown, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserRow {
