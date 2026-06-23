@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppShell } from "@/components/layout/AppShell";
 import { RequireAuth, RequireAdmin, RedirectIfAuthed } from "@/components/RouteGuards";
 import { PlacementGate } from "@/components/PlacementGate";
+import { DictionaryProvider } from "@/components/dictionary/DictionaryProvider";
+import Vocabulary from "./pages/Vocabulary.tsx";
 
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
@@ -35,9 +37,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AppShell>
-            <PlacementGate>
-              <Routes>
-                <Route path="/" element={<Index />} />
+            <DictionaryProvider>
+              <PlacementGate>
+                <Routes>
+                  <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                 <Route path="/auth/forget-password" element={<ForgotPassword />} />
@@ -59,13 +62,15 @@ const App = () => (
                 <Route path="/modules/:moduleId/:lessonId" element={<RequireAuth><LessonDetail /></RequireAuth>} />
                 <Route path="/practice" element={<RequireAuth><Practice /></RequireAuth>} />
                 <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+                <Route path="/vocabulary" element={<RequireAuth><Vocabulary /></RequireAuth>} />
                 <Route path="/admin" element={<RequireAdmin><AdminHome /></RequireAdmin>} />
                 <Route path="/admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
                 <Route path="/admin/lessons" element={<RequireAdmin><AdminLessons /></RequireAdmin>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </PlacementGate>
+              </PlacementGate>
+            </DictionaryProvider>
           </AppShell>
         </AuthProvider>
       </BrowserRouter>
