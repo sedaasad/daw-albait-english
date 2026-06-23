@@ -44,6 +44,20 @@ export default function Profile() {
           <StatCard icon={<Sparkles className="size-5 text-success" />} value={profile?.completed_lessons.length ?? 0} label="درس" />
         </div>
 
+
+        <Link to="/vocabulary" className="block">
+          <Card className="p-4 shadow-card flex items-center gap-3 hover:bg-foreground/5 transition-colors">
+            <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <BookMarked className="size-5" />
+            </div>
+            <div className="flex-1">
+              <p className="font-display">قاموسي</p>
+              <p className="text-xs text-muted-foreground">الكلمات التي حفظتها</p>
+            </div>
+            <ChevronLeft className="size-4 text-muted-foreground" />
+          </Card>
+        </Link>
+
         <Button variant="outline" className="w-full h-11" onClick={signOut}>
           <LogOut className="size-4" />
           تسجيل الخروج
