@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      dictionary_words: {
+        Row: {
+          cefr_level: Database["public"]["Enums"]["cefr_level"] | null
+          created_at: string
+          example_ar: string | null
+          example_en: string | null
+          id: string
+          meaning_ar: string
+          phonetic: string | null
+          word: string
+        }
+        Insert: {
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
+          created_at?: string
+          example_ar?: string | null
+          example_en?: string | null
+          id?: string
+          meaning_ar: string
+          phonetic?: string | null
+          word: string
+        }
+        Update: {
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
+          created_at?: string
+          example_ar?: string | null
+          example_en?: string | null
+          id?: string
+          meaning_ar?: string
+          phonetic?: string | null
+          word?: string
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           audio_url: string | null
@@ -298,6 +331,32 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_vocabulary: {
+        Row: {
+          saved_at: string
+          user_id: string
+          word_id: string
+        }
+        Insert: {
+          saved_at?: string
+          user_id: string
+          word_id: string
+        }
+        Update: {
+          saved_at?: string
+          user_id?: string
+          word_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_vocabulary_word_id_fkey"
+            columns: ["word_id"]
+            isOneToOne: false
+            referencedRelation: "dictionary_words"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
