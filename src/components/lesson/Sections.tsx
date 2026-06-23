@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { RuleData, FormulaData, DialogueData, VocabData } from "@/data/curriculum";
 import { SpeakButton } from "./SpeakButton";
-import { TappableText } from "@/components/dictionary/DictionaryProvider";
 
 export function RuleSection({ d }: { d: RuleData }) {
   return (
@@ -25,7 +24,7 @@ export function RuleSection({ d }: { d: RuleData }) {
           <div key={i} className="flex items-center justify-between gap-2 bg-muted/50 rounded-xl px-3 py-2.5">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <SpeakButton text={ex.en} />
-              <TappableText text={ex.en} className="font-black text-primary text-sm font-en truncate" />
+              <span className="font-black text-primary text-sm font-en truncate">{ex.en}</span>
             </div>
             <span className="text-sm text-muted-foreground">{ex.ar}</span>
           </div>
@@ -67,7 +66,7 @@ export function FormulaSection({ d }: { d: FormulaData }) {
                   <p className="text-sm text-foreground mb-1">{ex.ar}</p>
                   <div className="flex items-center gap-2">
                     <SpeakButton text={ex.en} />
-                    <TappableText text={ex.en} className="text-sm font-bold text-primary font-en flex-1" />
+                    <p className="text-sm font-bold text-primary font-en flex-1">{ex.en}</p>
                   </div>
                 </div>
               ))}
@@ -102,7 +101,7 @@ function ReadDialogue({ d }: { d: DialogueData }) {
                   text={ex.en}
                   className={cn((isPrimary || ex.sp === 2) && "bg-white/20 text-white hover:bg-white/30")}
                 />
-                <TappableText text={ex.en} className="text-sm font-en font-bold flex-1" />
+                <p className="text-sm font-en font-bold flex-1">{ex.en}</p>
               </div>
               <p className={cn("text-xs mt-1", isPrimary || ex.sp === 2 ? "opacity-70" : "text-muted-foreground")}>{ex.ar}</p>
             </div>
@@ -215,7 +214,7 @@ function InteractiveDialogue({ d }: { d: DialogueData }) {
                     : "bg-muted"
                 )}
               >
-                <TappableText text={ex.en} className="text-sm font-en font-bold" />
+                <p className="text-sm font-en font-bold">{ex.en}</p>
                 <p className={cn("text-xs mt-1", isPrimary || ex.sp === 2 ? "opacity-70" : "text-muted-foreground")}>{ex.ar}</p>
               </div>
             </div>
@@ -228,7 +227,7 @@ function InteractiveDialogue({ d }: { d: DialogueData }) {
           <div className="flex items-start gap-2">
             <SpeakButton text={current.en} />
             <div className="flex-1">
-              <TappableText text={current.en} className="text-sm font-en font-bold text-primary" />
+              <p className="text-sm font-en font-bold text-primary">{current.en}</p>
               <p className="text-xs text-muted-foreground mt-1">{current.ar}</p>
             </div>
           </div>
@@ -366,7 +365,7 @@ export function VocabSection({ d }: { d: VocabData }) {
         <div key={i} className="bg-muted/50 rounded-xl p-3 text-center">
           <div className="flex items-center justify-center gap-1.5 mb-1">
             <SpeakButton text={w.en} />
-            <TappableText text={w.en} className="font-black text-primary text-sm font-en" />
+            <p className="font-black text-primary text-sm font-en">{w.en}</p>
           </div>
           <p className="text-xs text-muted-foreground">{w.ar}</p>
         </div>
