@@ -3,7 +3,8 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Flame, Trophy, Sparkles, LogOut, Mail, Award } from "lucide-react";
+import { Flame, Trophy, Sparkles, LogOut, Mail, Award, BookMarked, ChevronLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "مبتدئ",
