@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { RuleData, FormulaData, DialogueData, VocabData } from "@/data/curriculum";
 import { SpeakButton } from "./SpeakButton";
+import { TappableText } from "@/components/dictionary/DictionaryProvider";
 
 export function RuleSection({ d }: { d: RuleData }) {
   return (
