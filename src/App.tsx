@@ -37,9 +37,10 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <AppShell>
-            <PlacementGate>
-              <Routes>
-                <Route path="/" element={<Index />} />
+            <DictionaryProvider>
+              <PlacementGate>
+                <Routes>
+                  <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />
                 <Route path="/auth/forget-password" element={<ForgotPassword />} />
