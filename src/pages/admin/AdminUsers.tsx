@@ -118,6 +118,7 @@ export default function AdminUsers() {
                   u={u}
                   onRevoke={() => setApproved(u.id, false)}
                   onMakeAdmin={() => makeAdmin(u.id)}
+                  onRemoveAdmin={() => removeAdmin(u.id)}
                 />
               ))}
             </Section>
@@ -142,11 +143,13 @@ function UserItem({
   onApprove,
   onRevoke,
   onMakeAdmin,
+  onRemoveAdmin,
 }: {
   u: UserRow;
   onApprove?: () => void;
   onRevoke?: () => void;
   onMakeAdmin?: () => void;
+  onRemoveAdmin?: () => void;
 }) {
   const isAdmin = u.roles.includes("admin");
   return (
@@ -170,11 +173,17 @@ function UserItem({
       )}
       {onRevoke && (
         <>
-          {!isAdmin && onMakeAdmin && (
-            <Button size="sm" variant="outline" onClick={onMakeAdmin}>
-              <Crown className="size-4" />
-            </Button>
-          )}
+          {isAdmin
+            ? onRemoveAdmin && (
+                <Button size="sm" variant="outline" onClick={onRemoveAdmin} title="إزالة صلاحية المدير">
+                  <ShieldOff className="size-4" />
+                </Button>
+              )
+            : onMakeAdmin && (
+                <Button size="sm" variant="outline" onClick={onMakeAdmin} title="ترقية إلى مدير">
+                  <Crown className="size-4" />
+                </Button>
+              )}
           <Button size="sm" variant="outline" onClick={onRevoke}>
             <X className="size-4" />
           </Button>
