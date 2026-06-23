@@ -734,7 +734,7 @@ export type Database = {
     }
     Enums: {
       app_role: "student" | "admin"
-      cefr_level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2"
+      cefr_level: "A0" | "A1" | "A2" | "B1" | "B2" | "C1" | "C2"
       user_level: "beginner" | "intermediate" | "advanced"
     }
     CompositeTypes: {
@@ -864,7 +864,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["student", "admin"],
-      cefr_level: ["A1", "A2", "B1", "B2", "C1", "C2"],
+      cefr_level: ["A0", "A1", "A2", "B1", "B2", "C1", "C2"],
       user_level: ["beginner", "intermediate", "advanced"],
     },
   },
