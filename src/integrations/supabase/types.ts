@@ -47,47 +47,283 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_sections: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          lesson_id: string
+          order_index: number
+          section_type: string
+          title_ar: string | null
+          title_en: string | null
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          lesson_id: string
+          order_index?: number
+          section_type: string
+          title_ar?: string | null
+          title_en?: string | null
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          order_index?: number
+          section_type?: string
+          title_ar?: string | null
+          title_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_sections_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lesson_vocabulary: {
+        Row: {
+          lesson_id: string
+          order_index: number
+          vocabulary_id: string
+        }
+        Insert: {
+          lesson_id: string
+          order_index?: number
+          vocabulary_id: string
+        }
+        Update: {
+          lesson_id?: string
+          order_index?: number
+          vocabulary_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_vocabulary_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_vocabulary_vocabulary_id_fkey"
+            columns: ["vocabulary_id"]
+            isOneToOne: false
+            referencedRelation: "vocabulary_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
+          ai_tips_ar: string | null
           audio_url: string | null
           body_md: string
+          cefr_level: Database["public"]["Enums"]["cefr_level"] | null
           created_at: string
           day_number: number
           description_ar: string
+          duration_min: number | null
           id: string
           image_url: string | null
+          intro_ar: string | null
+          intro_en: string | null
           is_published: boolean
+          learning_outcomes_ar: string[] | null
+          module_id: string | null
+          order_index: number | null
+          slug: string | null
           title_ar: string
           title_en: string
           updated_at: string
         }
         Insert: {
+          ai_tips_ar?: string | null
           audio_url?: string | null
           body_md?: string
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           created_at?: string
           day_number: number
           description_ar?: string
+          duration_min?: number | null
           id?: string
           image_url?: string | null
+          intro_ar?: string | null
+          intro_en?: string | null
           is_published?: boolean
+          learning_outcomes_ar?: string[] | null
+          module_id?: string | null
+          order_index?: number | null
+          slug?: string | null
           title_ar: string
           title_en?: string
           updated_at?: string
         }
         Update: {
+          ai_tips_ar?: string | null
           audio_url?: string | null
           body_md?: string
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           created_at?: string
           day_number?: number
           description_ar?: string
+          duration_min?: number | null
           id?: string
           image_url?: string | null
+          intro_ar?: string | null
+          intro_en?: string | null
           is_published?: boolean
+          learning_outcomes_ar?: string[] | null
+          module_id?: string | null
+          order_index?: number | null
+          slug?: string | null
           title_ar?: string
           title_en?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levels: {
+        Row: {
+          code: string
+          created_at: string
+          description_ar: string | null
+          name_ar: string
+          name_en: string
+          order_index: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description_ar?: string | null
+          name_ar: string
+          name_en: string
+          order_index?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description_ar?: string | null
+          name_ar?: string
+          name_en?: string
+          order_index?: number
+        }
         Relationships: []
+      }
+      listening_tasks: {
+        Row: {
+          audio_text: string
+          comprehension_question_ar: string | null
+          correct_index: number | null
+          created_at: string
+          id: string
+          lesson_id: string
+          options: Json | null
+          order_index: number
+          prompt_ar: string
+        }
+        Insert: {
+          audio_text: string
+          comprehension_question_ar?: string | null
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          lesson_id: string
+          options?: Json | null
+          order_index?: number
+          prompt_ar: string
+        }
+        Update: {
+          audio_text?: string
+          comprehension_question_ar?: string | null
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          options?: Json | null
+          order_index?: number
+          prompt_ar?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listening_tasks_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modules: {
+        Row: {
+          bg_gradient: string | null
+          created_at: string
+          description_ar: string | null
+          est_hours: number | null
+          icon: string | null
+          id: string
+          is_published: boolean
+          level_code: string
+          order_index: number
+          slug: string
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          bg_gradient?: string | null
+          created_at?: string
+          description_ar?: string | null
+          est_hours?: number | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          level_code: string
+          order_index?: number
+          slug: string
+          title_ar: string
+          title_en: string
+          updated_at?: string
+        }
+        Update: {
+          bg_gradient?: string | null
+          created_at?: string
+          description_ar?: string | null
+          est_hours?: number | null
+          icon?: string | null
+          id?: string
+          is_published?: boolean
+          level_code?: string
+          order_index?: number
+          slug?: string
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "modules_level_code_fkey"
+            columns: ["level_code"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -156,32 +392,38 @@ export type Database = {
         Row: {
           correct_index: number
           created_at: string
+          explanation_ar: string | null
           id: string
           lesson_id: string
           options: Json
           order_index: number
           question_ar: string
           question_en: string
+          quiz_id: string | null
         }
         Insert: {
           correct_index: number
           created_at?: string
+          explanation_ar?: string | null
           id?: string
           lesson_id: string
           options: Json
           order_index?: number
           question_ar: string
           question_en?: string
+          quiz_id?: string | null
         }
         Update: {
           correct_index?: number
           created_at?: string
+          explanation_ar?: string | null
           id?: string
           lesson_id?: string
           options?: Json
           order_index?: number
           question_ar?: string
           question_en?: string
+          quiz_id?: string | null
         }
         Relationships: [
           {
@@ -189,6 +431,13 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
             referencedColumns: ["id"]
           },
         ]
@@ -228,6 +477,41 @@ export type Database = {
           },
         ]
       }
+      quizzes: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          order_index: number
+          pass_score_percent: number
+          title_ar: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          order_index?: number
+          pass_score_percent?: number
+          title_ar: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          order_index?: number
+          pass_score_percent?: number
+          title_ar?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       recordings: {
         Row: {
           audio_path: string
@@ -253,6 +537,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "recordings_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      speaking_tasks: {
+        Row: {
+          created_at: string
+          id: string
+          lesson_id: string
+          order_index: number
+          phonetic: string | null
+          prompt_ar: string
+          target_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lesson_id: string
+          order_index?: number
+          phonetic?: string | null
+          prompt_ar: string
+          target_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          order_index?: number
+          phonetic?: string | null
+          prompt_ar?: string
+          target_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "speaking_tasks_lesson_id_fkey"
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lessons"
@@ -357,6 +679,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vocabulary_items: {
+        Row: {
+          audio_url: string | null
+          category: string | null
+          cefr_level: Database["public"]["Enums"]["cefr_level"] | null
+          created_at: string
+          example_ar: string | null
+          example_en: string | null
+          id: string
+          meaning_ar: string
+          phonetic: string | null
+          word_en: string
+        }
+        Insert: {
+          audio_url?: string | null
+          category?: string | null
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
+          created_at?: string
+          example_ar?: string | null
+          example_en?: string | null
+          id?: string
+          meaning_ar: string
+          phonetic?: string | null
+          word_en: string
+        }
+        Update: {
+          audio_url?: string | null
+          category?: string | null
+          cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
+          created_at?: string
+          example_ar?: string | null
+          example_en?: string | null
+          id?: string
+          meaning_ar?: string
+          phonetic?: string | null
+          word_en?: string
+        }
+        Relationships: []
       }
     }
     Views: {
