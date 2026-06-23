@@ -120,7 +120,10 @@ export const QUICK_VOCAB = [
   { en: "Patience", ar: "صبر", emoji: "⏳" },
 ];
 
+import { A0_MODULE_1 } from "./a0Module1";
+
 export const MODULES: Module[] = [
+  A0_MODULE_1,
   {
     id: "phonetics",
     titleAr: "علم الأصوات",
