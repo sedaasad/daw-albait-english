@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { AppShell } from "@/components/layout/AppShell";
 import { RequireAuth, RequireAdmin, RedirectIfAuthed } from "@/components/RouteGuards";
 import { PlacementGate } from "@/components/PlacementGate";
+import { DictionaryProvider } from "@/components/dictionary/DictionaryProvider";
+import Vocabulary from "./pages/Vocabulary.tsx";
 
 import Index from "./pages/Index.tsx";
 import Auth from "./pages/Auth.tsx";
