@@ -128,7 +128,7 @@ export type Database = {
           body_md: string
           cefr_level: Database["public"]["Enums"]["cefr_level"] | null
           created_at: string
-          day_number: number
+          day_number: number | null
           description_ar: string
           duration_min: number | null
           id: string
@@ -150,7 +150,7 @@ export type Database = {
           body_md?: string
           cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           created_at?: string
-          day_number: number
+          day_number?: number | null
           description_ar?: string
           duration_min?: number | null
           id?: string
@@ -172,7 +172,7 @@ export type Database = {
           body_md?: string
           cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
           created_at?: string
-          day_number?: number
+          day_number?: number | null
           description_ar?: string
           duration_min?: number | null
           id?: string
