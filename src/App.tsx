@@ -62,13 +62,15 @@ const App = () => (
                 <Route path="/modules/:moduleId/:lessonId" element={<RequireAuth><LessonDetail /></RequireAuth>} />
                 <Route path="/practice" element={<RequireAuth><Practice /></RequireAuth>} />
                 <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+                <Route path="/vocabulary" element={<RequireAuth><Vocabulary /></RequireAuth>} />
                 <Route path="/admin" element={<RequireAdmin><AdminHome /></RequireAdmin>} />
                 <Route path="/admin/users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
                 <Route path="/admin/lessons" element={<RequireAdmin><AdminLessons /></RequireAdmin>} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </PlacementGate>
+              </PlacementGate>
+            </DictionaryProvider>
           </AppShell>
         </AuthProvider>
       </BrowserRouter>
