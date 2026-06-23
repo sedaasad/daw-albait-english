@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Crown } from "lucide-react";
+import { Check, X, Crown, ShieldOff } from "lucide-react";
 import { toast } from "sonner";
 
 interface UserRow {
@@ -52,6 +52,24 @@ export default function AdminUsers() {
     const { error } = await supabase.from("profiles").update({ is_approved: value }).eq("id", id);
     if (error) return toast.error("فشل التحديث");
     toast.success(value ? "تمت الموافقة" : "تم إلغاء الموافقة");
+
+    if (value) {
+      // Fire-and-forget notification email
+      supabase.functions
+        .invoke("send-transactional-email", {
+          body: {
+            templateName: "approval-notification",
+            recipientEmail: users.find((u) => u.id === id)?.email,
+            idempotencyKey: `approval-${id}`,
+            templateData: {
+              name: users.find((u) => u.id === id)?.display_name ?? "",
+            },
+          },
+        })
+        .then(({ error: e }) => {
+          if (!e) toast.success("تم إرسال إشعار بالبريد");
+        });
+    }
     load();
   }
 
@@ -59,6 +77,17 @@ export default function AdminUsers() {
     const { error } = await supabase.from("user_roles").insert({ user_id: id, role: "admin" });
     if (error && !error.message.includes("duplicate")) return toast.error("فشل التحديث");
     toast.success("تمت ترقيته إلى مدير");
+    load();
+  }
+
+  async function removeAdmin(id: string) {
+    const { error } = await supabase
+      .from("user_roles")
+      .delete()
+      .eq("user_id", id)
+      .eq("role", "admin");
+    if (error) return toast.error("فشل إزالة صلاحية المدير");
+    toast.success("تمت إزالة صلاحية المدير");
     load();
   }
 
@@ -89,6 +118,7 @@ export default function AdminUsers() {
                   u={u}
                   onRevoke={() => setApproved(u.id, false)}
                   onMakeAdmin={() => makeAdmin(u.id)}
+                  onRemoveAdmin={() => removeAdmin(u.id)}
                 />
               ))}
             </Section>
@@ -113,11 +143,13 @@ function UserItem({
   onApprove,
   onRevoke,
   onMakeAdmin,
+  onRemoveAdmin,
 }: {
   u: UserRow;
   onApprove?: () => void;
   onRevoke?: () => void;
   onMakeAdmin?: () => void;
+  onRemoveAdmin?: () => void;
 }) {
   const isAdmin = u.roles.includes("admin");
   return (
@@ -141,11 +173,17 @@ function UserItem({
       )}
       {onRevoke && (
         <>
-          {!isAdmin && onMakeAdmin && (
-            <Button size="sm" variant="outline" onClick={onMakeAdmin}>
-              <Crown className="size-4" />
-            </Button>
-          )}
+          {isAdmin
+            ? onRemoveAdmin && (
+                <Button size="sm" variant="outline" onClick={onRemoveAdmin} title="إزالة صلاحية المدير">
+                  <ShieldOff className="size-4" />
+                </Button>
+              )
+            : onMakeAdmin && (
+                <Button size="sm" variant="outline" onClick={onMakeAdmin} title="ترقية إلى مدير">
+                  <Crown className="size-4" />
+                </Button>
+              )}
           <Button size="sm" variant="outline" onClick={onRevoke}>
             <X className="size-4" />
           </Button>
