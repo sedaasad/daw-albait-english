@@ -35,6 +35,7 @@ export default function LessonDetail() {
   const { moduleId, lessonId } = useParams();
   const navigate = useNavigate();
   const { completed, markComplete } = useCompletedLessons();
+  const { user, profile, refreshProfile } = useAuth();
 
   const mod = MODULES.find((m) => m.id === moduleId);
   const lesson = mod?.lessons.find((l) => l.id === lessonId);
@@ -45,6 +46,8 @@ export default function LessonDetail() {
   const [qIdx, setQIdx] = useState(0);
   const [qSel, setQSel] = useState<number | null>(null);
   const [qScore, setQScore] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const savedRef = useRef<string | null>(null);
 
   if (!mod || !lesson) {
     return <div dir="rtl" className="p-10 text-center text-muted-foreground">الدرس غير موجود</div>;
@@ -55,6 +58,7 @@ export default function LessonDetail() {
   function resetQuiz() {
     setQStarted(false); setQDone(false); setQIdx(0); setQSel(null); setQScore(0);
   }
+
 
   function handleAnswer(idx: number) {
     if (qSel !== null) return;
