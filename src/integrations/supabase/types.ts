@@ -124,6 +124,7 @@ export type Database = {
       lessons: {
         Row: {
           ai_tips_ar: string | null
+          archived_at: string | null
           audio_url: string | null
           body_md: string
           cefr_level: Database["public"]["Enums"]["cefr_level"] | null
@@ -146,6 +147,7 @@ export type Database = {
         }
         Insert: {
           ai_tips_ar?: string | null
+          archived_at?: string | null
           audio_url?: string | null
           body_md?: string
           cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
@@ -168,6 +170,7 @@ export type Database = {
         }
         Update: {
           ai_tips_ar?: string | null
+          archived_at?: string | null
           audio_url?: string | null
           body_md?: string
           cefr_level?: Database["public"]["Enums"]["cefr_level"] | null
