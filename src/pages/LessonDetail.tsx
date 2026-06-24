@@ -74,6 +74,52 @@ export default function LessonDetail() {
     }, 900);
   }
 
+  // Persist quiz result to DB once per attempt (looks up DB lesson by slug = local lesson id)
+  useEffect(() => {
+    if (!qDone || !user || !lesson || quiz.length === 0) return;
+    const attemptKey = `${lesson.id}:${Date.now()}`;
+    if (savedRef.current === lesson.id) return;
+    savedRef.current = lesson.id;
+    (async () => {
+      setSaving(true);
+      try {
+        const { data: dbLesson } = await supabase
+          .from("lessons")
+          .select("id")
+          .eq("slug", lesson.id)
+          .maybeSingle();
+        if (!dbLesson?.id) return;
+
+        const { error: insErr } = await supabase.from("quiz_scores").insert({
+          user_id: user.id,
+          lesson_id: dbLesson.id,
+          score: qScore,
+          total: quiz.length,
+        });
+        if (insErr) {
+          console.error("quiz_scores insert failed", insErr);
+          toast.error("تعذّر حفظ النتيجة");
+          return;
+        }
+
+        const pts = qScore * 10;
+        if (pts > 0 && profile) {
+          await supabase
+            .from("profiles")
+            .update({ total_points: (profile.total_points ?? 0) + pts })
+            .eq("id", user.id);
+          await refreshProfile();
+        }
+        toast.success(`تم حفظ النتيجة: ${qScore}/${quiz.length} (+${pts} نقطة)`);
+      } finally {
+        setSaving(false);
+      }
+    })();
+    void attemptKey;
+  }, [qDone]);
+
+
+
   function finishLesson() {
     if (!completed.has(lesson!.id)) {
       markComplete(lesson!.id);
