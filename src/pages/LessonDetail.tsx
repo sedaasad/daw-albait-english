@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,9 @@ import { useCompletedLessons } from "@/hooks/useCompletedLessons";
 import { RuleSection, FormulaSection, DialogueSection, VocabSection } from "@/components/lesson/Sections";
 import { PronunciationPractice } from "@/components/lesson/PronunciationPractice";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 function collectPhrases(lesson: { sections: any[] }): string[] {
   const out: string[] = [];
@@ -32,6 +35,7 @@ export default function LessonDetail() {
   const { moduleId, lessonId } = useParams();
   const navigate = useNavigate();
   const { completed, markComplete } = useCompletedLessons();
+  const { user, profile, refreshProfile } = useAuth();
 
   const mod = MODULES.find((m) => m.id === moduleId);
   const lesson = mod?.lessons.find((l) => l.id === lessonId);
@@ -42,6 +46,8 @@ export default function LessonDetail() {
   const [qIdx, setQIdx] = useState(0);
   const [qSel, setQSel] = useState<number | null>(null);
   const [qScore, setQScore] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const savedRef = useRef<string | null>(null);
 
   if (!mod || !lesson) {
     return <div dir="rtl" className="p-10 text-center text-muted-foreground">الدرس غير موجود</div>;
@@ -51,7 +57,10 @@ export default function LessonDetail() {
 
   function resetQuiz() {
     setQStarted(false); setQDone(false); setQIdx(0); setQSel(null); setQScore(0);
+    savedRef.current = null;
   }
+
+
 
   function handleAnswer(idx: number) {
     if (qSel !== null) return;
@@ -66,6 +75,52 @@ export default function LessonDetail() {
       }
     }, 900);
   }
+
+  // Persist quiz result to DB once per attempt (looks up DB lesson by slug = local lesson id)
+  useEffect(() => {
+    if (!qDone || !user || !lesson || quiz.length === 0) return;
+    const attemptKey = `${lesson.id}:${Date.now()}`;
+    if (savedRef.current === lesson.id) return;
+    savedRef.current = lesson.id;
+    (async () => {
+      setSaving(true);
+      try {
+        const { data: dbLesson } = await supabase
+          .from("lessons")
+          .select("id")
+          .eq("slug", lesson.id)
+          .maybeSingle();
+        if (!dbLesson?.id) return;
+
+        const { error: insErr } = await supabase.from("quiz_scores").insert({
+          user_id: user.id,
+          lesson_id: dbLesson.id,
+          score: qScore,
+          total: quiz.length,
+        });
+        if (insErr) {
+          console.error("quiz_scores insert failed", insErr);
+          toast.error("تعذّر حفظ النتيجة");
+          return;
+        }
+
+        const pts = qScore * 10;
+        if (pts > 0 && profile) {
+          await supabase
+            .from("profiles")
+            .update({ total_points: (profile.total_points ?? 0) + pts })
+            .eq("id", user.id);
+          await refreshProfile();
+        }
+        toast.success(`تم حفظ النتيجة: ${qScore}/${quiz.length} (+${pts} نقطة)`);
+      } finally {
+        setSaving(false);
+      }
+    })();
+    void attemptKey;
+  }, [qDone]);
+
+
 
   function finishLesson() {
     if (!completed.has(lesson!.id)) {
