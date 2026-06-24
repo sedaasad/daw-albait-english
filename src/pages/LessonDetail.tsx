@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowRight, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,9 @@ import { useCompletedLessons } from "@/hooks/useCompletedLessons";
 import { RuleSection, FormulaSection, DialogueSection, VocabSection } from "@/components/lesson/Sections";
 import { PronunciationPractice } from "@/components/lesson/PronunciationPractice";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+
 
 function collectPhrases(lesson: { sections: any[] }): string[] {
   const out: string[] = [];
