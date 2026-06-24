@@ -57,7 +57,9 @@ export default function LessonDetail() {
 
   function resetQuiz() {
     setQStarted(false); setQDone(false); setQIdx(0); setQSel(null); setQScore(0);
+    savedRef.current = null;
   }
+
 
 
   function handleAnswer(idx: number) {
