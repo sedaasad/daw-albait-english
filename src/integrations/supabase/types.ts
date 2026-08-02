@@ -727,12 +727,46 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_quiz_answer: {
+        Args: { _question_id: string; _selected: number }
+        Returns: {
+          correct: boolean
+          explanation_ar: string
+        }[]
+      }
+      get_lesson_quiz: {
+        Args: { _lesson_id: string }
+        Returns: {
+          id: string
+          options: Json
+          order_index: number
+          question_ar: string
+          question_en: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      save_placement_result: {
+        Args: {
+          _cefr: Database["public"]["Enums"]["cefr_level"]
+          _score: number
+          _strengths: string[]
+          _weaknesses: string[]
+        }
+        Returns: undefined
+      }
+      submit_quiz_attempt: {
+        Args: { _answers: Json; _lesson_id: string }
+        Returns: {
+          points: number
+          score: number
+          total: number
+        }[]
       }
     }
     Enums: {

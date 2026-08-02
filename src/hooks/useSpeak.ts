@@ -33,17 +33,21 @@ export function useSpeak() {
       let url = cache.get(text);
       if (!url) {
         const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          toast.error("سجّل الدخول لاستخدام الصوت.");
+          setSpeakingKey(null);
+          return;
+        }
         const res = await fetch(FUNCTIONS_URL, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            ...(session?.access_token
-              ? { Authorization: `Bearer ${session.access_token}` }
-              : { Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` }),
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ text, voice: "alloy" }),
         });
+
 
         if (!res.ok) {
           let msg = `TTS ${res.status}`;

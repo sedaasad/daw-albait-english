@@ -55,17 +55,13 @@ export default function PlacementTest() {
       return;
     }
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        cefr_level: r.cefr,
-        placement_score: r.score,
-        placement_completed: true,
-        placement_strengths: r.strengths,
-        placement_weaknesses: r.weaknesses,
-        placement_completed_at: new Date().toISOString(),
-      })
-      .eq("id", user.id);
+    const { error } = await supabase.rpc("save_placement_result", {
+      _cefr: r.cefr,
+      _score: r.score,
+      _strengths: r.strengths,
+      _weaknesses: r.weaknesses,
+    });
+
     setSaving(false);
     if (error) {
       toast.error("فشل حفظ النتيجة / Failed to save: " + error.message);
