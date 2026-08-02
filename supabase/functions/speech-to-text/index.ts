@@ -2,6 +2,7 @@
 // Accepts multipart/form-data with `file` (audio blob) and optional `model`.
 // Forwards to Lovable AI Gateway transcription endpoint and returns { text }.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { getAuthenticatedUserId } from "../_shared/auth.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -9,7 +10,16 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const userId = await getAuthenticatedUserId(req);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+
     if (!LOVABLE_API_KEY) {
       return new Response(JSON.stringify({ error: "LOVABLE_API_KEY not configured" }), {
         status: 500,

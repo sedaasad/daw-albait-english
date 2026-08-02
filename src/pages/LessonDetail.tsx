@@ -48,77 +48,118 @@ export default function LessonDetail() {
   const [qScore, setQScore] = useState(0);
   const [saving, setSaving] = useState(false);
   const savedRef = useRef<string | null>(null);
+  const [dbLessonId, setDbLessonId] = useState<string | null>(null);
+  const [dbQuestions, setDbQuestions] = useState<
+    { id: string; q: string; opts: string[] }[]
+  >([]);
+  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [feedback, setFeedback] = useState<{ correct: boolean; exp: string | null } | null>(null);
+
+  const localQuiz = lesson?.quiz ?? [];
+
+  // Load the server-side quiz (without the answer key) for this lesson
+  useEffect(() => {
+    if (!lesson || !user) return;
+    let cancelled = false;
+    (async () => {
+      const { data: dbLesson } = await supabase
+        .from("lessons")
+        .select("id")
+        .eq("slug", lesson.id)
+        .maybeSingle();
+      if (cancelled || !dbLesson?.id) return;
+      setDbLessonId(dbLesson.id);
+      const { data: qs } = await supabase.rpc("get_lesson_quiz", { _lesson_id: dbLesson.id });
+      if (cancelled || !qs) return;
+      setDbQuestions(
+        qs.map((row: any) => ({
+          id: row.id,
+          q: row.question_ar || row.question_en,
+          opts: Array.isArray(row.options) ? (row.options as string[]) : [],
+        })),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [lesson?.id, user?.id]);
+
+  const dbMode = dbQuestions.length > 0;
+  const items: { id?: string; q: string; opts: string[]; c?: number; exp?: string }[] = dbMode
+    ? dbQuestions
+    : localQuiz.map((x: any) => ({ q: x.q, opts: x.opts, c: x.c, exp: x.exp }));
 
   if (!mod || !lesson) {
     return <div dir="rtl" className="p-10 text-center text-muted-foreground">الدرس غير موجود</div>;
   }
 
-  const quiz = lesson.quiz;
+  const quiz = items;
 
   function resetQuiz() {
     setQStarted(false); setQDone(false); setQIdx(0); setQSel(null); setQScore(0);
+    setAnswers({}); setFeedback(null);
     savedRef.current = null;
   }
 
-
-
-  function handleAnswer(idx: number) {
+  async function handleAnswer(idx: number) {
     if (qSel !== null) return;
     setQSel(idx);
-    const ok = idx === quiz[qIdx].c;
+    const item = quiz[qIdx];
+
+    let ok = false;
+    if (dbMode && item.id) {
+      setAnswers((a) => ({ ...a, [item.id!]: idx }));
+      const { data } = await supabase.rpc("check_quiz_answer", {
+        _question_id: item.id,
+        _selected: idx,
+      });
+      const row = Array.isArray(data) ? data[0] : data;
+      ok = !!row?.correct;
+      setFeedback({ correct: ok, exp: row?.explanation_ar ?? null });
+    } else {
+      ok = idx === item.c;
+      setFeedback({ correct: ok, exp: item.exp ?? null });
+    }
     if (ok) setQScore((s) => s + 1);
+
     setTimeout(() => {
       if (qIdx + 1 < quiz.length) {
-        setQIdx((q) => q + 1); setQSel(null);
+        setQIdx((q) => q + 1); setQSel(null); setFeedback(null);
       } else {
         setQDone(true);
       }
-    }, 900);
+    }, 1200);
   }
 
-  // Persist quiz result to DB once per attempt (looks up DB lesson by slug = local lesson id)
+  // Persist the attempt server-side: the server recomputes the score and awards points
   useEffect(() => {
-    if (!qDone || !user || !lesson || quiz.length === 0) return;
-    const attemptKey = `${lesson.id}:${Date.now()}`;
+    if (!qDone || !user || !lesson || !dbMode || !dbLessonId) return;
     if (savedRef.current === lesson.id) return;
     savedRef.current = lesson.id;
     (async () => {
       setSaving(true);
       try {
-        const { data: dbLesson } = await supabase
-          .from("lessons")
-          .select("id")
-          .eq("slug", lesson.id)
-          .maybeSingle();
-        if (!dbLesson?.id) return;
-
-        const { error: insErr } = await supabase.from("quiz_scores").insert({
-          user_id: user.id,
-          lesson_id: dbLesson.id,
-          score: qScore,
-          total: quiz.length,
+        const { data, error } = await supabase.rpc("submit_quiz_attempt", {
+          _lesson_id: dbLessonId,
+          _answers: answers,
         });
-        if (insErr) {
-          console.error("quiz_scores insert failed", insErr);
+        if (error) {
+          console.error("submit_quiz_attempt failed", error.message);
           toast.error("تعذّر حفظ النتيجة");
           return;
         }
-
-        const pts = qScore * 10;
-        if (pts > 0 && profile) {
-          await supabase
-            .from("profiles")
-            .update({ total_points: (profile.total_points ?? 0) + pts })
-            .eq("id", user.id);
+        const row = Array.isArray(data) ? data[0] : data;
+        if (row) {
+          setQScore(row.score);
           await refreshProfile();
+          toast.success(`تم حفظ النتيجة: ${row.score}/${row.total} (+${row.points} نقطة)`);
         }
-        toast.success(`تم حفظ النتيجة: ${qScore}/${quiz.length} (+${pts} نقطة)`);
       } finally {
         setSaving(false);
       }
     })();
-    void attemptKey;
   }, [qDone]);
+
 
 
 
@@ -229,7 +270,11 @@ export default function LessonDetail() {
                 <p className="font-black text-base mb-4 leading-relaxed">{quiz[qIdx].q}</p>
                 <div className="space-y-2">
                   {quiz[qIdx].opts.map((opt, i) => {
-                    const isCorrect = i === quiz[qIdx].c;
+                    const isPickedOpt = qSel === i;
+                    const isCorrect = dbMode
+                      ? isPickedOpt && !!feedback?.correct
+                      : i === quiz[qIdx].c;
+
                     const isPicked = qSel === i;
                     return (
                       <button
@@ -251,14 +296,15 @@ export default function LessonDetail() {
                     );
                   })}
                 </div>
-                {qSel !== null && (
+                {qSel !== null && feedback && (
                   <div className={cn(
                     "mt-3 rounded-xl p-3 text-xs",
-                    qSel === quiz[qIdx].c ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                    feedback.correct ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
                   )}>
-                    💡 {quiz[qIdx].exp}
+                    💡 {feedback.exp ?? (feedback.correct ? "إجابة صحيحة" : "إجابة غير صحيحة")}
                   </div>
                 )}
+
               </Card>
             )}
           </div>

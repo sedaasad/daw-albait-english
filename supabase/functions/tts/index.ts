@@ -1,9 +1,11 @@
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { getAuthenticatedUserId } from "../_shared/auth.ts";
 
 const exposeHeaders = {
   ...corsHeaders,
   "Access-Control-Expose-Headers": "X-TTS-Provider, X-TTS-Fallback, X-TTS-Fallback-Reason",
 };
+
 
 async function tryLovable(text: string, voice: string) {
   const apiKey = Deno.env.get("LOVABLE_API_KEY");
@@ -30,8 +32,17 @@ async function tryLovable(text: string, voice: string) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: exposeHeaders });
   try {
+    const userId = await getAuthenticatedUserId(req);
+    if (!userId) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...exposeHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { text, voice } = await req.json();
     if (!text || typeof text !== "string") {
+
       return new Response(JSON.stringify({ error: "text required" }), {
         status: 400,
         headers: { ...exposeHeaders, "Content-Type": "application/json" },
