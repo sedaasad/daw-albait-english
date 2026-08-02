@@ -12,6 +12,8 @@ const EXEMPT_PATHS = [
   "/reset-password",
   "/pending-approval",
   "/placement-test",
+  "/.lovable/oauth/consent",
+
 ];
 
 /**
