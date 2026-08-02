@@ -25,6 +25,7 @@ import PlacementTest from "./pages/PlacementTest.tsx";
 import AdminHome from "./pages/admin/AdminHome.tsx";
 import AdminUsers from "./pages/admin/AdminUsers.tsx";
 import AdminLessons from "./pages/admin/AdminLessons.tsx";
+import OAuthConsent from "./pages/OAuthConsent.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -47,6 +48,7 @@ const App = () => (
                 <Route path="/auth/Forgetpassword" element={<ForgotPassword />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/.lovable/oauth/consent" element={<OAuthConsent />} />
                 <Route
                   path="/pending-approval"
                   element={

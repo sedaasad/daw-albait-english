@@ -1,0 +1,177 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://oxsskdiqkxjuvjhdydvy.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "daw-albayt-mcp",
+      "version": "0.1.0",
+      "title": "ضوء البيت — English Learning"
+    },
+    "tools": [
+      {
+        "name": "list_modules",
+        "title": "List curriculum modules",
+        "description": "List the published curriculum modules of the English learning platform, with CEFR level, Arabic/English titles and estimated hours.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "level_code": {
+              "type": "string",
+              "description": "Optional CEFR level filter, e.g. A0, A1, B1."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_lessons",
+        "title": "List lessons",
+        "description": "List published lessons. Optionally filter by module slug (e.g. a0-m1-alphabet-sounds). Archived legacy lessons are excluded.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "module_slug": {
+              "type": "string",
+              "description": "Slug of the module to list lessons for."
+            },
+            "limit": {
+              "type": "integer",
+              "description": "Max lessons to return (default 50)."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_lesson",
+        "title": "Get lesson content",
+        "description": "Fetch a lesson's full content by slug: intro, learning outcomes, AI tips, ordered content sections and linked vocabulary items.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "description": "Lesson slug, e.g. a0-m1-l1."
+            }
+          },
+          "required": [
+            "slug"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_dictionary",
+        "title": "Search the English-Arabic dictionary",
+        "description": "Search the app's English-Arabic learning dictionary for a word and return phonetics, Arabic meaning and example sentences.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "English word or partial word to look up."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "save_word",
+        "title": "Save a word to my vocabulary",
+        "description": "Save a dictionary word to the signed-in learner's personal vocabulary list. The word must already exist in the app dictionary.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "word": {
+              "type": "string",
+              "description": "The exact English word to save, e.g. 'library'."
+            }
+          },
+          "required": [
+            "word"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_my_vocabulary",
+        "title": "List my saved vocabulary",
+        "description": "List the words the signed-in learner has saved to their personal vocabulary list.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_my_progress",
+        "title": "Get my learning progress",
+        "description": "Get the signed-in learner's own progress: CEFR level, points, streak, placement results and recent quiz scores.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
