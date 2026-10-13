@@ -751,6 +751,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      mark_lesson_complete: { Args: { _lesson_id: string }; Returns: string[] }
       save_placement_result: {
         Args: {
           _cefr: Database["public"]["Enums"]["cefr_level"]
