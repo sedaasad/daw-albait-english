@@ -5,6 +5,8 @@ import { RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { VERBS } from "@/data/curriculum";
 import { SpeechToTextPractice } from "@/components/lesson/SpeechToTextPractice";
+import { ReadingStories } from "@/components/practice/ReadingStories";
+import { PronunciationLessons } from "@/components/practice/PronunciationLessons";
 
 
 export default function Practice() {
@@ -17,6 +19,8 @@ export default function Practice() {
       <PageHeader title="التمارين" subtitle="الأفعال الشاذة وتمارين تفاعلية" />
 
       <div className="max-w-md mx-auto px-4 pb-24 space-y-5">
+        <ReadingStories />
+        <PronunciationLessons />
         <SpeechToTextPractice />
 
         <Card className="p-4 shadow-card">
