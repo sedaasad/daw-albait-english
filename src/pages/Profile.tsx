@@ -5,6 +5,46 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Flame, Trophy, Sparkles, LogOut, Mail, Award, BookMarked, ChevronLeft } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+
+type ScoreRow = { id: string; score: number; total: number; completed_at: string; lessons: { title_ar: string } | null };
+
+function QuizHistory({ userId }: { userId?: string }) {
+  const [rows, setRows] = useState<ScoreRow[] | null>(null);
+  useEffect(() => {
+    if (!userId) return;
+    supabase
+      .from("quiz_scores")
+      .select("id, score, total, completed_at, lessons(title_ar)")
+      .eq("user_id", userId)
+      .order("completed_at", { ascending: false })
+      .limit(10)
+      .then(({ data }) => setRows((data as unknown as ScoreRow[]) ?? []));
+  }, [userId]);
+
+  return (
+    <Card className="p-4 shadow-card">
+      <p className="font-display mb-3">نتائج الاختبارات</p>
+      {rows === null ? (
+        <p className="text-xs text-muted-foreground">جارٍ التحميل…</p>
+      ) : rows.length === 0 ? (
+        <p className="text-xs text-muted-foreground">لم تُكمل أي اختبار بعد.</p>
+      ) : (
+        <ul className="space-y-2">
+          {rows.map((r) => (
+            <li key={r.id} className="flex items-center justify-between text-sm">
+              <span className="truncate">{r.lessons?.title_ar ?? "درس"}</span>
+              <span className="font-en font-semibold text-primary" dir="ltr">
+                {r.score}/{r.total}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
 
 const LEVEL_LABEL: Record<string, string> = {
   beginner: "مبتدئ",
@@ -43,6 +83,8 @@ export default function Profile() {
           <StatCard icon={<Trophy className="size-5 text-secondary" />} value={profile?.total_points ?? 0} label="نقطة" />
           <StatCard icon={<Sparkles className="size-5 text-success" />} value={profile?.completed_lessons.length ?? 0} label="درس" />
         </div>
+
+        <QuizHistory userId={user?.id} />
 
 
         <Link to="/vocabulary" className="block">
