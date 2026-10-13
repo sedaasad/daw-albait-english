@@ -8,6 +8,7 @@ export interface Story {
   sentences: StorySentence[];
   explanation: string[]; // Arabic notes on grammar/vocabulary
   questions: StoryQuestion[];
+  glossary?: Record<string, string>;
 }
 
 export const STORIES: Story[] = [

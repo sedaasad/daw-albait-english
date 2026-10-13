@@ -1,3 +1,4 @@
+import { EXTRA_MODULES } from "./advancedCurriculum";
 // Daw Albait English curriculum (from final design spec)
 // All modules, lessons, sections, quizzes, verbs and quick-vocab live here.
 
@@ -620,9 +621,7 @@ export const MODULES: Module[] = [
       },
     ],
   },
-  { id: "medical", titleAr: "الإنجليزية الطبية", titleEn: "Medical English", icon: "🏥", bg: "from-red-600 to-red-900", level: "intermediate", total: 12, locked: true, lessons: [] },
-  { id: "scientific", titleAr: "الإنجليزية العلمية", titleEn: "Scientific English", icon: "🔬", bg: "from-indigo-600 to-indigo-900", level: "advanced", total: 22, locked: true, lessons: [] },
-  { id: "business", titleAr: "إنجليزية الأعمال", titleEn: "Business English", icon: "💼", bg: "from-amber-600 to-amber-900", level: "advanced", total: 8, locked: true, lessons: [] },
+  ...EXTRA_MODULES,
 ];
 
 export const TOTAL_LESSONS = MODULES.reduce((acc, m) => acc + m.lessons.length, 0);
