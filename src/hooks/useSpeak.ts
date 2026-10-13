@@ -21,7 +21,7 @@ export function useSpeak() {
   const [speakingKey, setSpeakingKey] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const speak = useCallback(async (text: string, key?: string) => {
+  const speak = useCallback(async (text: string, key?: string, rate = 1) => {
     const k = key ?? text;
     try {
       if (audioRef.current) {
@@ -70,6 +70,7 @@ export function useSpeak() {
       }
 
       const audio = new Audio(url);
+      audio.playbackRate = rate;
       audioRef.current = audio;
       audio.onended = () => setSpeakingKey(null);
       audio.onerror = () => setSpeakingKey(null);

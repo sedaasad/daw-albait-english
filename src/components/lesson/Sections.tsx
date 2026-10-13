@@ -359,17 +359,40 @@ export function DialogueSection({ d }: { d: DialogueData }) {
 }
 
 export function VocabSection({ d }: { d: VocabData }) {
+  const [test, setTest] = useState(false);
+  const [shown, setShown] = useState<Record<number, boolean>>({});
+  const [known, setKnown] = useState<Record<number, boolean>>({});
+  const knownCount = Object.values(known).filter(Boolean).length;
   return (
-    <div className="grid grid-cols-2 gap-2">
-      {d.words.map((w, i) => (
-        <div key={i} className="bg-muted/50 rounded-xl p-3 text-center">
-          <div className="flex items-center justify-center gap-1.5 mb-1">
-            <SpeakButton text={w.en} />
-            <p className="font-black text-primary text-sm font-en">{w.en}</p>
-          </div>
-          <p className="text-xs text-muted-foreground">{w.ar}</p>
-        </div>
-      ))}
+    <div>
+      <div className="flex items-center justify-between mb-3">
+        {test ? <span className="text-xs text-muted-foreground">عرفت {knownCount} / {d.words.length}</span> : <span />}
+        <Button size="sm" variant={test ? "default" : "outline"} className="gap-1.5"
+          onClick={() => { setTest((v) => !v); setShown({}); setKnown({}); }}>
+          <Sparkles className="w-3.5 h-3.5" />{test ? "عرض الكل" : "اختبر نفسك"}
+        </Button>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        {d.words.map((w, i) => {
+          const reveal = !test || shown[i];
+          return (
+            <div key={i} onClick={() => test && setShown((m) => ({ ...m, [i]: true }))}
+              className={cn("bg-muted/50 rounded-xl p-3 text-center transition", test && !shown[i] && "cursor-pointer hover:bg-muted", known[i] && "ring-2 ring-success")}>
+              <div className="flex items-center justify-center gap-1.5 mb-1">
+                <SpeakButton text={w.en} />
+                <p className="font-black text-primary text-sm font-en">{w.en}</p>
+              </div>
+              {reveal ? <p className="text-xs text-muted-foreground">{w.ar}</p> : <p className="text-xs text-muted-foreground">اضغط لرؤية المعنى</p>}
+              {test && shown[i] && known[i] === undefined && (
+                <div className="flex gap-1 mt-2 justify-center">
+                  <button onClick={(e) => { e.stopPropagation(); setKnown((m) => ({ ...m, [i]: true })); }} className="text-[11px] px-2 py-0.5 rounded-full bg-success/20 text-success font-bold">عرفتها</button>
+                  <button onClick={(e) => { e.stopPropagation(); setKnown((m) => ({ ...m, [i]: false })); }} className="text-[11px] px-2 py-0.5 rounded-full bg-destructive/15 text-destructive font-bold">لم أعرفها</button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
